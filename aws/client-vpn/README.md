@@ -2,13 +2,11 @@
 
 ## Setup
 
-Follow the steps of the web post bellow:
+* Follow the steps of the web post bellow:  
+  [AWS Client VPNを試してみる](https://qiita.com/atsumjp/items/837d8ea5763bb985ff8d)
 
-    [AWS Client VPNを試してみる](https://qiita.com/atsumjp/items/837d8ea5763bb985ff8d)
-
-If you are a Mac user, this article is helpful, too:
-
-    [AWS VPN User's Guide - MacOS](https://docs.aws.amazon.com/vpn/latest/clientvpn-user/macos.html)
+* If you are a Mac user, this article is helpful, too:  
+  [AWS VPN User's Guide - MacOS](https://docs.aws.amazon.com/vpn/latest/clientvpn-user/macos.html)
 
 ## References
 
