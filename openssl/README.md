@@ -10,6 +10,13 @@ server certificates from the CA is a little complicated. This document describes
   * macOS mojave (LibreSSL 2.6.5)
   * run "openssl version -a" to see OpenSSL version.
 
+## Head first certificate generation
+
+1. if root-ca and server directory exist, run "rm -rf root-ca server".
+1. run "./certgen.sh"
+
+You will have root.pem, root.der and root.pfx in root-ca directory, and server_crt in server directory.
+
 ## Step-by-step procedure of certificate generation
 
 ### 1. Generate a private key
@@ -53,18 +60,18 @@ For more detail about genrsa command, see [genrsa of OpenSSL reference](https://
 
 ### 2. Creating a root CA
 
-####  Create a CSR (Certificate Sining Request)
+#### (1) Create a private key
+
+Create a private key in the way mentioned above and save it as "root_key.pem".
+
+#### (2) Create a CSR (Certificate Signing Request)
 
 Use "openssl req -new" command to create a CSR, with -key option to specify the key file, "-subj" to specify subject of your organization, and "-batch" to disable interactive operation.
-
-```bash:
-#
-# create a CSR for a private CA
-#
 
 * Important notes
   * Always generate CSRs for **multidomain** certificates (Google chrome requires it)[^6]
 
+```bash:
 # Validity period is 365 days
 $ (No Encryption)openssl req -new -batch -key fd.key -days 365 -subj '/C=JP/ST=Tokyo/O=My Org/CN=My Org Private CA/emailAddress=foo@bar.com' -out fd.csr
 
@@ -82,13 +89,68 @@ Certificate Request:
 ```
 
 * When creating a CSR interactively (i.e. without "-batch" option), you are asked to input "challenge password".
- This is an optional field, and it is not used in reality, so you can leave it alone just by entering ENTER.
+ This is an optional field, and it is not used in reality, so you can leave it alone just by hitting ENTER.
 
-### generate a certificate
+#### (3) Generate a certificate
 
-Use "openssl  -new" command to create a CSR, with -key option to specify the key pair file, "-subj" to specify subject of your organization, and "-batch" to disable interactive operation.
+Use "openssl ca" command to generate a certificate. Before running the command, you have to prepare configuration/control files as bellow:
 
+```
+(.)
+ ├ newcerts/    (an empty directory)
+ ├ index.txt    (an empty file)
+ ├ serial       ("00")
+ └ crlnumber    (an empty file)
 
+Once setting up these files, then you can run "openssl" command as bellow:
+
+```bash:
+# create a certificate
+$openssl ca -in root.csr -selfsign -batch -keyfile root_key.pem -notext -config ./openssl.cnf -days 3650 -extfile v3_ca.txt -out root_crt.pem
+```
+
+### 3. Creating a server certificate
+
+#### (1) Create a private key
+
+Create a private key in the way mentioned above and save it as "server_key.pem".
+
+#### (2) Create a CSR (Certificate Signing Request)
+
+Use "openssl req" command just like when creating a CSR for a private CA.
+
+```bash:
+$ openssl req -new -key server_key.pem -subj "/C=JP/ST=Tokyo/O=MyOrg/OU=dev/CN=My Servers/" -config ./openssl.cnf -out server.csr
+```
+
+#### (3) Generate a certificate
+
+When creating a server certificate, you should specify all the possible DNS names and IP addresses in [alt_names] part in the v3_servers.txt file as bellow:
+
+```text:v3_servers.txt
+[SAN]
+basicConstraints = CA:false
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+authorityKeyIdentifier=keyid,issuer
+
+subjectAltName=@alt_names
+basicConstraints=CA:FALSE
+[alt_names]
+DNS.1=localhost
+IP.1=127.0.0.1
+IP.2=192.168.11.5
+```
+
+Then run "openssl ca" command:
+
+```bash:
+$ openssl ca -batch -in server.csr -config ./openssl.cnf -cert ${ROOTDIR}/root_crt.pem -keyfile ${ROOTDIR}/root_key.pem -extfile v3_servers.txt -extensions SAN -out server_crt.pem -days 365
+```
+
+### 3. Testing the server certificate
+
+Just run "node test-cert.js" and access "https://localhost:8443" with your favorite web browser.
 
 ### Resources
 
@@ -106,3 +168,4 @@ Use "openssl  -new" command to create a CSR, with -key option to specify the key
   Google Chrome on iOS/macOS requires certificates whose validity period <= 825 days.
 [^6]: [Google Chrome で自組織のCAで署名したSSL証明書のサイトにアクセスすると NET::ERR_CERT_COMMON_NAME_INVALID エラーメッセージが表示される](https://www.ipentec.com/document/windows-chrime-error-net-err-cert-common-name-invalid-using-ssl-certificate-signed-with-local-ca)  
   Google Chrome ignores CN and use SAN (Subject Alternative Names) to check the site's validity.
+[^7]: [opensslでサーバ証明書とルート証明書を作成するスクリプト](https://qiita.com/masahiro-aoike/items/965bd827dc13894f6664)
