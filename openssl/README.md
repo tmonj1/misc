@@ -195,11 +195,12 @@ Just run "node test-cert.js" and access "https://localhost:8443" with your favor
 
 ### Resources
 
-1. [OpenSSL ccokbook](https://www.feistyduck.com/library/openssl-cookbook/online/index.html)  
+1. [OpenSSL cookbook](https://www.feistyduck.com/library/openssl-cookbook/online/index.html)  
   A must read for everyone to know SSL/TLS, server certificates and OpenSSL.
 1. [OpenSSL](https://www.openssl.org)  
-  The official OpenSSL homepage.  
-  [OpenSSL commands](https://www.openssl.org/docs/man1.1.1/man1/)  
+  The official OpenSSL homepage.
+1. [OpenSSL commands](https://www.openssl.org/docs/man1.1.1/man1/)  
+  The official OpenSSL command reference.
 1. [CA certificates extracted from Mozilla](https://curl.haxx.se/docs/caextract.html)  
   Trustable Root CA certificates maintained by Mozilla and converted to the PEM format by Curl project.
 1. [Transport Layer Security](https://en.wikipedia.org/wiki/Transport_Layer_Security)  
@@ -209,3 +210,8 @@ Just run "node test-cert.js" and access "https://localhost:8443" with your favor
 1. [Google Chrome で自組織のCAで署名したSSL証明書のサイトにアクセスすると NET::ERR_CERT_COMMON_NAME_INVALID エラーメッセージが表示される](https://www.ipentec.com/document/windows-chrime-error-net-err-cert-common-name-invalid-using-ssl-certificate-signed-with-local-ca)  
   Google Chrome ignores CN and use SAN (Subject Alternative Names) to check the site's validity.
 1. [opensslでサーバ証明書とルート証明書を作成するスクリプト](https://qiita.com/masahiro-aoike/items/965bd827dc13894f6664)
+1. [Self-signed certificates in iOS apps](https://medium.com/collaborne-engineering/self-signed-certificates-in-ios-apps-ff489bf8b96e)  
+  Describe how to install a self-signed server certificate on iOS.
+1. [How do you get Chrome to accept a self-signed certificate?](https://www.pico.net/kb/how-do-you-get-chrome-to-accept-a-self-signed-certificate)  
+  Describe how to install a self-signed server certificate on Goole Chrome.
+　
