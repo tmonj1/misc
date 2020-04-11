@@ -205,6 +205,8 @@ Just run "node test-cert.js" and access "https://localhost:8443" with your favor
   Trustable Root CA certificates maintained by Mozilla and converted to the PEM format by Curl project.
 1. [Transport Layer Security](https://en.wikipedia.org/wiki/Transport_Layer_Security)  
   Detailed description on TLS, including feature support tables of well-known browsers for SSL/TLS protocols and various cipher algorithms.
+1. [今度こそopensslコマンドを理解して使いたい (1) ルートCAをスクリプトで作成する](https://qiita.com/3244/items/780469306a3c3051c9fe)  
+  very clear and easy-to-read articles on Qiita.
 1. [ET::ERR_CERT_REVOKED in Chrome/Chromium, introduced with MacOS Catalina](https://superuser.com/questions/1492207/neterr-cert-revoked-in-chrome-chromium-introduced-with-macos-catalina)  
   Google Chrome on iOS/macOS requires certificates whose validity period <= 825 days.
 1. [Google Chrome で自組織のCAで署名したSSL証明書のサイトにアクセスすると NET::ERR_CERT_COMMON_NAME_INVALID エラーメッセージが表示される](https://www.ipentec.com/document/windows-chrime-error-net-err-cert-common-name-invalid-using-ssl-certificate-signed-with-local-ca)  
