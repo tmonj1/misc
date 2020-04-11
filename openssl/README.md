@@ -8,7 +8,7 @@ server certificates from the CA is a little complicated. This document describes
 * OpenSSL 1.0.2 series or LibreSSL 2.6.5 is required.
   * frapsoft/openssl docker image (OpenSSL 1.0.2j)
   * macOS mojave (LibreSSL 2.6.5)
-  * run "openssl version -a" to see OpenSSL version.
+  * run "openssl version -a" to confirm OpenSSL version.
 
 ## Head first certificate generation
 
@@ -60,6 +60,16 @@ For more detail about genrsa command, see [genrsa of OpenSSL reference](https://
 
 ### 2. Creating a root CA
 
+Only four settings are important:
+
+```
+[ v3_ca ]
+subjectKeyIdentifier=hash  # always use "hash"
+authorityKeyIdentifier=keyid:always,issuer # always use this setting
+basicConstraints = critical, CA:true # set "CA:true" for CA. 
+keyUsage = cRLSign, keyCertSign # always use this setting for CA.
+```
+
 #### (1) Create a private key
 
 Create a private key in the way mentioned above and save it as "root_key.pem".
@@ -67,9 +77,6 @@ Create a private key in the way mentioned above and save it as "root_key.pem".
 #### (2) Create a CSR (Certificate Signing Request)
 
 Use "openssl req -new" command to create a CSR, with -key option to specify the key file, "-subj" to specify subject of your organization, and "-batch" to disable interactive operation.
-
-* Important notes
-  * Always generate CSRs for **multidomain** certificates (Google chrome requires it)[^6]
 
 ```bash:
 # Validity period is 365 days
@@ -109,7 +116,29 @@ Once setting up these files, then you can run "openssl" command as bellow:
 $openssl ca -in root.csr -selfsign -batch -keyfile root_key.pem -notext -config ./openssl.cnf -days 3650 -extfile v3_ca.txt -out root_crt.pem
 ```
 
+#### (4) Confirm the generated certificate
+
+Run "openssl x509 -text -purpose" command to confirm validity, signature algorithm, key usages, and extended key usages.
+
+```
+# comfirm the certificate
+$ openssl x509 -text -purpose -noout -in root_crt.pem
+```
+
 ### 3. Creating a server certificate
+
+You can use settings bellow both for server and client certificates
+because this includes all the settings for both uses.
+
+```
+[ v3_server ]
+# alway set CA:FALSE for server/client certificates
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, keyEncipherment, nonRepudiation, keyAgreement, dataEncipherment
+extendedKeyUsage = serverAuth, clientAuth
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
+```
 
 #### (1) Create a private key
 
@@ -118,6 +147,9 @@ Create a private key in the way mentioned above and save it as "server_key.pem".
 #### (2) Create a CSR (Certificate Signing Request)
 
 Use "openssl req" command just like when creating a CSR for a private CA.
+
+* Important notes
+  * Always generate CSRs for **multidomain** certificates (Google chrome requires it).
 
 ```bash:
 $ openssl req -new -key server_key.pem -subj "/C=JP/ST=Tokyo/O=MyOrg/OU=dev/CN=My Servers/" -config ./openssl.cnf -out server.csr
@@ -148,24 +180,32 @@ Then run "openssl ca" command:
 $ openssl ca -batch -in server.csr -config ./openssl.cnf -cert ${ROOTDIR}/root_crt.pem -keyfile ${ROOTDIR}/root_key.pem -extfile v3_servers.txt -extensions SAN -out server_crt.pem -days 365
 ```
 
+#### (4) Confirm the generated certificate
+
+Run "openssl x509 -text -purpose" command to confirm validity, signature algorithm, key usages, and extended key usages.
+
+```
+# comfirm the certificate
+$ openssl x509 -text -purpose -noout -in server_crt.pem
+```
+
 ### 3. Testing the server certificate
 
 Just run "node test-cert.js" and access "https://localhost:8443" with your favorite web browser.
 
 ### Resources
 
-[^1]: [OpenSSL ccokbook](https://www.feistyduck.com/library/openssl-cookbook/online/index.html)  
+1. [OpenSSL ccokbook](https://www.feistyduck.com/library/openssl-cookbook/online/index.html)  
   A must read for everyone to know SSL/TLS, server certificates and OpenSSL.
-[^2]: [OpenSSL](https://www.openssl.org)  
-  The official OpenSSL homepage.
-  * [OpenSSL commands](https://www.openssl.org/docs/man1.1.1/man1/)  
-    OpenSSL command reference.
-[^3]: [CA certificates extracted from Mozilla](https://curl.haxx.se/docs/caextract.html)  
+1. [OpenSSL](https://www.openssl.org)  
+  The official OpenSSL homepage.  
+  [OpenSSL commands](https://www.openssl.org/docs/man1.1.1/man1/)  
+1. [CA certificates extracted from Mozilla](https://curl.haxx.se/docs/caextract.html)  
   Trustable Root CA certificates maintained by Mozilla and converted to the PEM format by Curl project.
-[^4]: [Transport Layer Security](https://en.wikipedia.org/wiki/Transport_Layer_Security)  
+1. [Transport Layer Security](https://en.wikipedia.org/wiki/Transport_Layer_Security)  
   Detailed description on TLS, including feature support tables of well-known browsers for SSL/TLS protocols and various cipher algorithms.
-[^5]: [ET::ERR_CERT_REVOKED in Chrome/Chromium, introduced with MacOS Catalina](https://superuser.com/questions/1492207/neterr-cert-revoked-in-chrome-chromium-introduced-with-macos-catalina)  
+1. [ET::ERR_CERT_REVOKED in Chrome/Chromium, introduced with MacOS Catalina](https://superuser.com/questions/1492207/neterr-cert-revoked-in-chrome-chromium-introduced-with-macos-catalina)  
   Google Chrome on iOS/macOS requires certificates whose validity period <= 825 days.
-[^6]: [Google Chrome で自組織のCAで署名したSSL証明書のサイトにアクセスすると NET::ERR_CERT_COMMON_NAME_INVALID エラーメッセージが表示される](https://www.ipentec.com/document/windows-chrime-error-net-err-cert-common-name-invalid-using-ssl-certificate-signed-with-local-ca)  
+1. [Google Chrome で自組織のCAで署名したSSL証明書のサイトにアクセスすると NET::ERR_CERT_COMMON_NAME_INVALID エラーメッセージが表示される](https://www.ipentec.com/document/windows-chrime-error-net-err-cert-common-name-invalid-using-ssl-certificate-signed-with-local-ca)  
   Google Chrome ignores CN and use SAN (Subject Alternative Names) to check the site's validity.
-[^7]: [opensslでサーバ証明書とルート証明書を作成するスクリプト](https://qiita.com/masahiro-aoike/items/965bd827dc13894f6664)
+1. [opensslでサーバ証明書とルート証明書を作成するスクリプト](https://qiita.com/masahiro-aoike/items/965bd827dc13894f6664)
