@@ -217,3 +217,11 @@ Just run "node test-cert.js" and access "https://localhost:8443" with your favor
 1. [How do you get Chrome to accept a self-signed certificate?](https://www.pico.net/kb/how-do-you-get-chrome-to-accept-a-self-signed-certificate)  
   Describe how to install a self-signed server certificate on Goole Chrome.
 　
+### Resources (info about Google Chrome SSL/TLS support)
+
+|version|content|source|
+|:--|:--|:--|
+|56|remove SHA-1-signed certificate support| [Google Removing SHA-1 Support in Chrome 56](https://threatpost.com/google-removing-sha-1-support-in-chrome-56/122041/) |
+|58|begin to check SAN and ignore CN| [Browser Watch: SSL/Security Changes in Chrome 58](https://www.thesslstore.com/blog/security-changes-in-chrome-58/) |
+|65?|begin to check if validity is less equal 825 days|[SSL証明書の有効期限は2年に短縮される（2018年3月1日施行）](https://rms.ne.jp/digital-certificate-news/ballot-193)|
+|75?|begin to check key usage field|[GOOGLE CHROME 75.X, A SELF-SIGNED CERTIFICATE AND ERR_SSL_KEY_USAGE_INCOMPATIBLE)(https://hexeract.wordpress.com/2019/06/13/google-chrome-75-x-a-self-signed-certificate-and-err_ssl_key_usage_incompatible/)|
