@@ -1,4 +1,4 @@
-# How to create a Node.js-based docker images
+# How to create Node.js-based docker images
 
 ## Basics
 
