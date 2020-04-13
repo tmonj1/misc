@@ -2,13 +2,13 @@
 
 ## Basics
 
-* Base Image
-  * Use node:lts-slim as the base image, not node:lts-alpine
+* Base image
+  * use node:lts-slim as the base image, not node:lts-alpine
   * reason: [DockerでNode.jsアプリをイイ感じに保つ4つの方法](https://www.creationline.com/lab/29422)
-* Applicatio root
-  * Make "/app" or "/<app name>" as your application root
+* Application root
+  * make "/app" or "/<app name>" as your application root
 * Data root
-  * Make "/app/data" or "/<app name>/data" as your data root (which is mapped to a volume) 
+  * make "/app/data" or "/<app name>/data" as your data root (which is mapped to a volume) 
 
 ## Express
 
