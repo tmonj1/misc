@@ -1,5 +1,12 @@
+# Docker
 Dockerfile
-.git
+
+# Git
+.git*
+
+# VSCode
 .vscode
+
+# Node
 node_modules
 npm-debug.log
