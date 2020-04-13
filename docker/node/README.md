@@ -13,6 +13,8 @@
 ## Express
 
 ```bash:
+$ cd express
+$ docker build . -t tmj/express-app
 $ docker run -d -p 8080:8080 --rm --name app tmj/express-app
 ```
 
