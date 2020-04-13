@@ -9,6 +9,8 @@
   * make "/app" or "/<app name>" as your application root
 * Data root
   * make "/app/data" or "/<app name>/data" as your data root (which is mapped to a volume) 
+* **Must Read** Best practices
+  * [Docker and Node.js Best Practices](https://github.com/nodejs/docker-node/blob/master/docs/BestPractices.md)
 
 ## Express
 
