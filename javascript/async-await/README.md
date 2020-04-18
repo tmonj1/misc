@@ -46,11 +46,11 @@ So, using **await** makes it possible to execute lines of code including
 asynchronous call in the same method **sequentially**. This makes code more
 readable and easy to write.
 
-A function in which **await** is used must be declared as **async** function.
-This is because such a function is different from a ordinary function in terms
-of that it can return in the middle of execution, and then can be reactivated
-from the point where it left last time. In other word, such a function has more
-than one entry point.
+A function in which **await** is used must be declared as an  **async**
+function.  This is because such a function is different from an ordinary
+function in terms of that it can return in the middle of execution, and then
+can be reactivated from the point where it left last time. In other word,
+such a function has more than one entry point.
 
 The behavior of **await** is just like "yield" statement in a generator.
 Actually, it is possible to rewrite **await** using generator.
@@ -66,7 +66,7 @@ including:
 1. generator (rewrite version of await + promise using generator)
 
 You can understand how the asyncronous code is executed by comparing source
-code and the output of program.
+code and the output of the program.
 
 To use the program, type `node index.js type_of_call`, where type_of_call
 is one of these: `async`, `promise`, `promise-await` and `generator`. Or, type
