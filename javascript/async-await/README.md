@@ -10,7 +10,7 @@ generator to mimic it.
 ## async and await
 
 "await" waits for the resolution of the target promise, and "async" keyword is
-prepended to a function which uses the "await" keyword. As an example, take a
+prepended to the function in which "await" is used. As an example, take a
 look at the code below:
 
 ```JavaScript:
@@ -25,7 +25,7 @@ foo();
 console.log("foo called.");
 ```
 
-When you execute code above, the output is like below:
+When you execute the code above, the output is as follows:
 
 ```
 calling foo.
@@ -34,23 +34,23 @@ foo called.
 bar called.
 ```
 
-Because **await** waits for bar to get resovled and returns to the caller
+Because **await** waits for bar() to get resovled and returns to the caller
 immediately after executing bar() in the middle of foo method, "foo called." is
 output before "bar called." which is output when the promise gets resovled and
 the next line of **await** gets reactivated and executed.
 
-If there was no **await** in this code (and **async**, too), "bar called" is
-output before "foo called."
+If there was no **await** in this code (and **async**, too), "bar called" comes
+before "foo called."
 
 So, using **await** makes it possible to execute lines of code including
-asynchronous call in the same method sequentially. This makes code more readable
-and easy towrite.
+asynchronous call sequentially in the same method. This makes code more readable
+and easy to write.
 
-A function in which **await** is used must declare as **async** function. This
-is because such a function is different from a ordinary function in terms of
-that it can return in the middle of execution, and then can be reactivated from
-the point where it left last time. In other word, such a function has more than
-one entry point.
+A function in which **await** is used must be declared as **async** function.
+This is because such a function is different from a ordinary function in terms
+of that it can return in the middle of execution, and then can be reactivated
+from the point where it left last time. In other word, such a function has more
+than one entry point.
 
 The behavior of **await** is just like "yield" statement in a generator.
 Actually, it is possible to rewrite **await** using generator.
@@ -65,11 +65,11 @@ including:
 1. promise + await
 1. generator (rewrite version of await + promise using generator)
 
-You can see both source code and the output of program to understand how the
-code is executed.
+You can understand how the asyncronous code is executed by comparing source
+code and the output of program.
 
-To use the program, type `node index.js type_of_call`, where *type_of_call*
-is one of these: async, promise, promise-await and generator, or type
+To use the program, type `node index.js type_of_call`, where type_of_call
+is one of these: `async`, `promise`, `promise-await` and `generator`. Or, type
 `node index.js -h` for help.
 
 ```bash:
