@@ -43,8 +43,8 @@ If there was no **await** in this code (and **async**, too), "bar called" comes
 before "foo called."
 
 So, using **await** makes it possible to execute lines of code including
-asynchronous call sequentially in the same method. This makes code more readable
-and easy to write.
+asynchronous call in the same method **sequentially**. This makes code more
+readable and easy to write.
 
 A function in which **await** is used must be declared as **async** function.
 This is because such a function is different from a ordinary function in terms
