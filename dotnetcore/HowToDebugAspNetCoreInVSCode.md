@@ -12,7 +12,8 @@ Just open launch.json in your project, and set `justMyCode` to false, enable
 `sourceLinkOptions`, and set `searchMicrosoftSymbolServer` in `symbolOptions`
 to true as shown below:
 
-```JSON:launch.json
+```:launch.json
+// launch.json
 {
   "version": "0.2.0",
   "configurations": [
