@@ -40,8 +40,9 @@ to true as shown below:
 
 Debugging ASP.NET Core source code is made possible via `Source Link` feature,
 which enables you to debug ASP.NET Core source code even when you have no
-symbol files (.pdb) installed on you local machine. They are downloaded from
-Microsoft Symbol server on demand when you debug into ASP.NET source code.
+correspondent symbol files (.pdb) installed on your local machine; they are
+downloaded from Microsoft symbol server on demand when you debug into ASP.NET
+source code.
 
 ## References
 
