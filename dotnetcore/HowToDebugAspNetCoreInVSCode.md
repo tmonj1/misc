@@ -31,9 +31,6 @@ to true as shown below:
         "searchMicrosoftSymbolServer": true,
         "searchNuGetOrgSymbolServer": false
       },
-  :
-  : (omitted.)
-  :
 ```
 
 ## Why it works
