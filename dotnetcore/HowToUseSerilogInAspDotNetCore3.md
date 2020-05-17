@@ -162,9 +162,9 @@ So far, so good. But there are some residual code in appSettings.json,  it would
 
 Remove the **Logging** section in appSettings.json entirely. You can remove it because the section is for .NET Core built-in logging, which is already useless.
 
+before:
 ```JSON
 {
-  // before
   "Logging": {
     "LogLevel": {
       "Default": "Information",
@@ -176,10 +176,12 @@ Remove the **Logging** section in appSettings.json entirely. You can remove it b
 }
 ```
 
+after:
+```JSON
 {
-  // after
-  “AllowedHosts”: “*”
+  "AllowedHosts”: “*”
 }
+```
 
 ## 3. Configuration
 
@@ -231,18 +233,17 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 }
 ```
 
-You need to add serilog settings in appSettings.json. This one is very simple one (just add a Console provider):
+You need to add serilog settings in appSettings.json. This is very simple one (just add a Console provider):
 
 ```JSON
 "Serilog": {
-
     "Using": [
       "Serilog.Sinks.Console"
     ],
-    "MinimumLevel": “Information",
+    "MinimumLevel": "Information",
     "WriteTo": [
       {
-        "Name": “Console”
+        "Name": "Console”
       }
     ]
   }
@@ -308,10 +309,10 @@ Now that it becomes possible to configure logger via appSettings.json, let’s f
  "Serilog": {
     "Using": [ "Serilog.Exceptions", "Serilog", "Serilog.Sinks.Console", "Serilog.Sinks.Seq" ],
     "MinimumLevel": {
-      "Default": “Information",
+      "Default": "Information",
       "Override": {             // <— Override minimu level of infrastructure events
-        "System": “Warning”,    // <- System events
-        "Microsoft": “Warning”  // <- Microsoft events (including Microsoft.AspNetCore.* events)
+        "System": "Warning",    // <- System events
+        "Microsoft" : "Warning"  // <- Microsoft events (including Microsoft.AspNetCore.* events)
       }
     }
     //
@@ -334,10 +335,10 @@ All the infrastructure event output are gone. But this time the output log is to
     "Using": [
       "Serilog.Sinks.Console"
     ],
-    "MinimumLevel": “Information",
+    "MinimumLevel": "Information",
     "WriteTo": [
       {
-        "Name": “Console””,
+        "Name": "Console",
         // Add Json formatter. This is equivalent to write “.WriteTo.Console(new JsonFormatter())” in code.
         "Args": {
           "formatter": "Serilog.Formatting.Json.JsonFormatter, Serilog"
@@ -368,7 +369,7 @@ In order to send log output to Seq, add Seq entry to WriteTo section in appSetti
 
   "WriteTo": [
       {
-        "Name": “Console””,
+        "Name": "Console",
         // Add Json formatter. This is equivalent to write “.WriteTo.Console(new JsonFormatter())” in code.
         "Args": {
           "formatter": "Serilog.Formatting.Json.JsonFormatter, Serilog"
@@ -378,7 +379,7 @@ In order to send log output to Seq, add Seq entry to WriteTo section in appSetti
       {
         "Name": "Seq",
         "Args": {
-          "serverUrl": "http://localhost:5341”,
+          "serverUrl": "http://localhost:5341",
           "restrictedToMinimumLevel": "Verbose"
         }
       }
@@ -438,8 +439,8 @@ Then, add a few properties to appSettings.json:
 ```JSON
  "Enrich": [
       "FromLogContext",
-      "WithMachineName”,  // <— output machine name (use Serilog.Enrichers.Environment package)
-      "WithProcessId”,    // <- output process id (use Serilog.Enrichers.Process package)
+      "WithMachineName",  // <— output machine name (use Serilog.Enrichers.Environment package)
+      "WithProcessId",    // <- output process id (use Serilog.Enrichers.Process package)
       “WithThreadId”      // <- output thread id (use Serilog.Enrichers.Thread package)
     ]
 ```
@@ -456,14 +457,14 @@ If you want to add static properties (like fixed string), you can do it by addin
 
 ```JSON
 {
-  “Serilog”: {
+  "Serilog": {
     // ..
     // (omitted)
     //
 
     //
     "Properties": {
-      "Application": “demo1” // <- Add Application property and set its value to “demo1"
+      "Application": "demo1" // <- Add Application property and set its value to “demo1"
     }
   }
 }
