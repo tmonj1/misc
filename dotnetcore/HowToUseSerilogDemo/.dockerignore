@@ -1,0 +1,7 @@
+bin
+obj
+Properties
+.vscode
+.vimrc.local
+README.md
+docker-compose.yml
