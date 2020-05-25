@@ -1,8 +1,9 @@
 # How to use Serilog in ASP.NET Core 3
 
 This is an example code explaining how to use Serilog in ASP.NET Core 3.
+There are two ways of running the example.
 
-## 1. Run the example program and SEQ
+## 1. `dotnet run` the example program, and run SEQ on docker
 
 * warning: This scenario does not work in a proxy environment probably because SEQ does not support proxy.
 In that case, try #2 scenario (using docker).
@@ -18,7 +19,7 @@ $ dotnet run
 
 After the program runs successfuly, open your browser and go to "http://localhost:5100" (or https://localhost:5101), and then go to "http://localhsot:5341" for SEQ.
 
-## 2. Publish and run both the program and SEQ
+## 2. Run both the program and SEQ on docker
 
 ```bash
 # docker build and run
