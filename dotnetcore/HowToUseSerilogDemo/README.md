@@ -27,3 +27,14 @@ $ docker-compose up -d
 ```
 
 After the program runs successfuly, open your browser and go to "http://localhost:5100" (or https://localhost:5101), and then go to "http://localhsot:5341" for SEQ.
+
+## 3. Using fluentd
+
+### 3.1 Setup and configuration
+
+```bash
+$ dotnet add serilog.formatting.elasticsearch
+```
+
+Writing logs to Elasticsearch with Fluentd using Serilog in ASP.NET Core
+https://andrewlock.net/writing-logs-to-elasticsearch-with-fluentd-using-serilog-in-asp-net-core/
