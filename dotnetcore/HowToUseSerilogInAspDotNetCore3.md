@@ -9,7 +9,6 @@
 - [3. Configuration](#3-configuration)
   - [3.1 Use appSettings.json](#31-use-appsettingsjson)
   - [3.2 Enable request logging](#32-enable-request-logging)
-  - [3.3 Trim out infrastructure events](#33-trim-out-infrastructure-events)
   - [3.4 Use JSON formatter to enhance log output](#34-use-json-formatter-to-enhance-log-output)
   - [3.5 (Optional) Use Seq](#35-optional-use-seq)
   - [3.6 Use Enricher to get contextual properties](#36-use-enricher-to-get-contextual-properties)
@@ -58,7 +57,7 @@ info: Microsoft.Hosting.Lifetime[0]
 info: Microsoft.Hosting.Lifetime[0]
 ```
 
-As you can see, all the output is at ``info`` level. Each log message consists of two lines, the first line indicates ``Log category`` (e.g. Microsoft.Hosting.Liftime) and the second shows its log message.
+As you can see, all the output is at ``info`` level. Each log message consists of two lines, the first line indicates ``Log category`` (e.g. Microsoft.Hosting.Lifetime) and the second shows its log message.
 
 ### 2.2 Install Serilog packages
 
@@ -66,8 +65,8 @@ Install Serilog packages using ``dotnet add package commands`` or ``NuGet``.
 
 ```bash
 $ dotnet add package Serilog
-$ dotnet add pacakge Serilog.AspNetCore
-$ dotnet add pacakge Serilog.Sinks.Console
+$ dotnet add package Serilog.AspNetCore
+$ dotnet add package Serilog.Sinks.Console
 $ dotnet add package Serilog.Sinks.File
 $ dotnet add package Serilog.Sinks.Fluentd  # if needed
 ```
@@ -405,13 +404,13 @@ Here is an explanation of important properties:
 | SourceContext | class name of the instance which emits the log entry. In other words, the class T of ILogger<T> in source code. |
 | ConnectionId  | Unique connection Identifier set automatically by Kestrel.                                                      |
 | RequestId     | Unique Request Identifier set automatically by Kestrel in {ConnectionId}:{SerialNumber} format.                 |
-| TraceId       | TraceId is used for identifying unique tansaction across multiple components in an microservices application.   |
+| TraceId       | TraceId is used for identifying unique transaction across multiple components in an microservices application.  |
 | ParentId      | ParentId is used to correlate logs across multiple components.                                                  |
 | SpanId        | Same as above.                                                                                                  |
 
 ### 3.7 Install and use additional Enrichers to augment log output
 
-Our log output is now very usefull, but still has a room to improve. If we have machine name,  process id, and thread id in our log, it would be very usefull in a microservices application environment. To do that, install these packages:
+Our log output is now very useful, but still has a room to improve. If we have machine name,  process id, and thread id in our log, it would be very useful in a microservices application environment. To do that, install these packages:
 
 ```bash
 $ dotnet add package Serilog.Enrichers.Environment
@@ -458,7 +457,7 @@ The output is like this:
 
 ### 3.9 Override appSettings.json with environment variables
 
-It is possible to override settings in appSettings.json with environment varialbles. For example, `Application` property in `Properties` can be overriden like this:
+It is possible to override settings in appSettings.json with environment varialbles. For example, `Application` property in `Properties` can be overridden like this:
 
 ```bash
 $ export Serilog__Properties__application=“demo2”  # <- override appSettings.json
@@ -474,7 +473,7 @@ In the above example code, there is no way of getting errors at the very early s
 
 ### 4.2 Logger injection
 
-You can use DI to inject Serilog logger to your class. For example, if you have LogTest class with constructor taking a parameter of type ILogger<LogTest> and let the framework to instanciate LogTest, then you will get a Serilog logger via constructor:
+You can use DI to inject Serilog logger to your class. For example, if you have LogTest class with constructor taking a parameter of type ILogger<LogTest> and let the framework to instantiate LogTest, then you will get a Serilog logger via constructor:
 
 ```C#
   public class LogTest : ILogTest
@@ -496,7 +495,7 @@ You can use DI to inject Serilog logger to your class. For example, if you have 
 
 ### 4.3 More properties (user agent, client ip, and so on)
 
-In the above example, there are not user agent properties nor client IP address. You can add these properties using Serilog.Sinkks.ClientInfo or write your own code for that purpose.<sup>[4](#4)</sup>
+In the above example, there are not user agent properties nor client IP address. You can add these properties using Serilog.Sinks.ClientInfo or write your own code for that purpose.<sup>[4](#4)</sup>
 
 ### 4.4 OpenTelemetry
 
