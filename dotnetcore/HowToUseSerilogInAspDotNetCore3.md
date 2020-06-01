@@ -20,6 +20,7 @@
   - [4.2 Logger injection](#42-logger-injection)
   - [4.3 More properties (user agent, client ip, and so on)](#43-more-properties-user-agent-client-ip-and-so-on)
   - [4.4 OpenTelemetry](#44-opentelemetry)
+  - [4.5 use with EFK stack on docker](#45-use-with-efk-stack-on-docker)
 - [5. References](#5-references)
 
 ---
@@ -302,7 +303,7 @@ The result is like this:
 
 ### 3.3 Trim out infrastructure events
 
-Now that it becomes possible to configure logger via appSettings.json, let’s fine begin to fine-tune configuration settings. First, there are too many infrastructure events (which is emitted by ASP.NET Core event handlers) output, so limit them only to warning or higher levels (but still set the minimum level of application events to Information). To do so, edit appSettings.json as below:
+Now that it becomes possible to configure logger via appSettings.json, let’s begin to fine-tune configuration settings. First, there are too many infrastructure events (which is emitted by ASP.NET Core event handlers) output, so limit them only to warning or higher levels (but still set the minimum level of application events to Information). To do so, edit appSettings.json as below:
 
 ```JSON
  "Serilog": {
@@ -471,6 +472,8 @@ Note that, `__` is used to separate hierarchy. In Windows, `:` is used instead.
 
 In the above example code, there is no way of getting errors at the very early stage of bootstrap because it takes some time to read appSettings.json to configure our logger. This problem is discussed [here](https://nblumhardt.com/2019/10/serilog-in-aspnetcore-3/).
 
+* After writing the above statements, I rewrite [HowToUseSerilogDemo](https://github.com/tmonj1/misc/tree/master/dotnetcore/HowToUseSerilogDemo) to be able to catch error on bootstrap. One of the side effects of this modification is not to be able to use appsettings.json to configure Serilog. It is still possible to allow some runtime configuration using environment variables or something, but you have to write many lines of custom code for that purpose. In reality, what you can do at most is to pick up some important settings which are expected to be changed according to the runtime envirionment and make them configurable.
+
 ### 4.2 Logger injection
 
 You can use DI to inject Serilog logger to your class. For example, if you have LogTest class with constructor taking a parameter of type ILogger<LogTest> and let the framework to instantiate LogTest, then you will get a Serilog logger via constructor:
@@ -500,6 +503,10 @@ In the above example, there are not user agent properties nor client IP address.
 ### 4.4 OpenTelemetry
 
 OpenTelemetry is a future standard for telemetry API and library. ASP.NET Core and other logging tools such as Prometheus will support OpenTelemetry in the near future. <sup>[5](#5)</sup>
+
+### 4.5 use with EFK stack on docker
+
+When deploying your app on docker and sending logs to EFK (Elasticsearch, Fluentd, and Kibana) stack, just use Console logger with ElasticsearchJsonFormatter. Fluentd log driver on docker collects the console output and sends it to Elasticsearch.
 
 ## 5. References
 
