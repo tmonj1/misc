@@ -18,31 +18,11 @@ namespace SerilogDemo
     {
         public static int Main(string[] args)
         {
-            //Console.WriteLine(Environment.GetEnvironmentVariable("SEQ_URL"));
-
-            // LOG_FORMATTER, LOG_MIN_LEVEL, LOG_MIN_LEVEL_MICROSOFT, LOG_MIN_LEVEL_SYSTEM, LOG_SEQ_URL
-            var logFormatter = Environment.GetEnvironmentVariable("LOG_FORMATTER");
-            var logMinLevel = Environment.GetEnvironmentVariable("LOG_MIN_LEVEL");
-            var logMinLevelMicrosoft = Environment.GetEnvironmentVariable("LOG_MIN_LEVEL_MICROSOFT");
-            var logMinLevelSystem = Environment.GetEnvironmentVariable("LOG_MIN_LEVEL_SYSTEM");
-            var logSeqUrl = Environment.GetEnvironmentVariable("LOG_SEQ_URL");
-
-            // emit log to console
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.ConfiguredTo(logMinLevel)
-                .MinimumLevel.ConfiguredTo("Microsoft", logMinLevelMicrosoft)
-                .MinimumLevel.ConfiguredTo("System", logMinLevelSystem)
-                .Enrich.WithProperty("AppName", AppAssemblyInfo.AppName)
-                .Enrich.WithProperty("Version", AppAssemblyInfo.AppVersion)
-                .Enrich.WithProcessId()
-                .Enrich.WithThreadId()
-                .Enrich.FromLogContext()
-                //.WriteTo.Console(new CompactJsonFormatter())
-                .WriteTo.ConsoleWithFormatter(logFormatter)
-                .CreateLogger();
-
             try
             {
+                // setup logger
+                SetupLogger();
+
                 CreateHostBuilder(args).Build().Run();
                 return 0;
             }
@@ -57,6 +37,27 @@ namespace SerilogDemo
             }
         }
 
+        /// <summary>
+        /// Setup console logger using Serilog.
+        /// </summary>
+        private static void SetupLogger()
+        {
+            // only supports LOG_[FORMATTER,MIN_LEVEL,MIN_LEVEL_MICROSOFT,MIN_LEVEL_SYSTEM]
+            Func<string, string> env = (key) => Environment.GetEnvironmentVariable(key);
+
+            // setup console logger only
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.ConfiguredTo(env("LOG_IMN_LEVEL"))
+                .MinimumLevel.ConfiguredTo("Microsoft", env("LOG_MIN_LEVEL_MICROSOFT"))
+                .MinimumLevel.ConfiguredTo("System", env("LOG_MIN_LEVEL_SYSTEM"))
+                .Enrich.WithProperty("AppName", AppAssemblyInfo.AppName)
+                .Enrich.WithProperty("Version", AppAssemblyInfo.AppVersion)
+                .Enrich.WithProcessId()
+                .Enrich.WithThreadId()
+                .Enrich.FromLogContext()
+                .WriteTo.ConsoleWithFormatter(env("LOG_FORMATTER"))
+                .CreateLogger();
+        }
         public static IHostBuilder CreateHostBuilder(string[] args) =>
               Host.CreateDefaultBuilder(args)
                   .UseSerilog()

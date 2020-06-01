@@ -1,4 +1,6 @@
 using System;
+using System.Reflection;
+using System.Linq;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
@@ -9,26 +11,39 @@ namespace SerilogDemo
 {
     public static class SerilogLoggerConfigurationExtension
     {
+        /// <summary>
+        /// Sets minimum level for the logger.
+        /// </summary>
+        /// <param name="loggerMinimum"></param>
+        /// <param name="minLevel">ログ出力レベル。
+        /// <para>nullまたは不正な文字列が指定された場合、デフォルトで"Information"レベルに設定されます。</param>
+        /// <returns></returns>
         public static LoggerConfiguration ConfiguredTo(this LoggerMinimumLevelConfiguration loggerMinimum, string minLevel)
         {
-            LoggerConfiguration loggerConfiguration = null;
             LogEventLevel level;
-            if (Enum.TryParse(minLevel, true, out level))
+            if (!string.IsNullOrEmpty(minLevel) && Enum.TryParse(minLevel, true, out level))
             {
-                loggerConfiguration = loggerMinimum.Is(level);
+                return loggerMinimum.Is(level);
             }
             else
             {
-                loggerConfiguration = loggerMinimum.Information();
+                return loggerMinimum.Information();
             }
-
-            return loggerConfiguration;
         }
 
+        /// <summary>
+        /// "Microsoft"と"System"のログ出力レベルを設定する。
+        /// </summary>
+        /// <param name="loggerMinimum"></param>
+        /// <param name="source">設定対象 ("Microsoft"または"System"</param>
+        /// <param name="minLevel">ログ出力レベル
+        /// <para>nullまたは解釈できない不正な文字列が指定された場合、デフォルトで"Warning"レベルに設定します。
+        /// </param>
+        /// <returns></returns>
         public static LoggerConfiguration ConfiguredTo(this LoggerMinimumLevelConfiguration loggerMinimum, string source, string minLevel)
         {
             LogEventLevel level;
-            if (!Enum.TryParse(minLevel, true, out level))
+            if (string.IsNullOrEmpty(minLevel) || !Enum.TryParse(minLevel, true, out level))
             {
                 level = LogEventLevel.Warning;
             }
@@ -36,30 +51,62 @@ namespace SerilogDemo
             return loggerMinimum.Override(source, level);
         }
 
+        /// <summary>
+        /// コンソール出力時のフォーマッタを設定する。 
+        /// </summary>
+        /// <param name="loggerSinkConfiguration"></param>
+        /// <param name="formatterName?">フォーマッタのクラス名(完全修飾名),アセンブリ名
+        /// (例: Serilog.Formatting.Json.JsonFormatter, Serilog)
+        /// <para>nullまたはFormatterとして解釈できない不正な文字列を指定した場合、代わりにデフォルトフォーマッタ
+        /// (JsonFormatter) を使います。</para>
+        /// <example>
+        ///   <list type="bullet">
+        ///     <item>JsonFormatter</term>
+        ///     <description>Serilog.Formatting.Json.JsonFormatter,Serilog</description>
+        ///     <item>CompactJsonFormatter</item>
+        ///     <description>Serilog.Formatting.Compact.CompactJsonFormatter,Serilog.Formatting.Compact</description>
+        ///     <item>ElasticsearchJsonFormatter</item>
+        ///     <description>Serilog.Formatting.Elasticsearch.ElasticsearchJsonFormatter,Serilog.Formatting.Elasticsearch</description>
+        ///   </list>
+        /// </example>
+        /// </param>
+        /// <returns></returns>
         public static LoggerConfiguration ConsoleWithFormatter(this LoggerSinkConfiguration loggerSinkConfiguration, string formatterName)
         {
-            if (!string.IsNullOrEmpty(formatterName))
+            try
             {
-                try
+                // formatterName := <ClassName>,<AssemblyName>
+                string[] values = formatterName?.Replace(" ", "").Split(",");
+                if (values.Length == 2)
                 {
-                    Type type = Type.GetType(formatterName);
-                    if (type != null)
+                    (string className, string assemblyName) = (values[0], values[1]);
+
+                    // load the assembly
+                    var assembly = Assembly.Load(assemblyName);
+
+                    // load the formatter class
+                    Type type = assembly?.GetType(className);
+
+                    // create an Instance with all default params
+                    ParameterInfo[] paramInfos = type?.GetConstructors()?.FirstOrDefault<ConstructorInfo>()?.GetParameters();
+                    object[] ctorParams = paramInfos?.Select(p => p.DefaultValue)?.ToArray();
+                    ITextFormatter formatter = Activator.CreateInstance(type, ctorParams) as ITextFormatter;
+
+                    // configure console with the specified formatter 
+                    if (formatter != null)
                     {
-                        ITextFormatter formatter = Activator.CreateInstance(type) as ITextFormatter;
-                        if (formatter != null)
-                        {
-                            return loggerSinkConfiguration.Console(formatter);
-                        }
+                        return loggerSinkConfiguration.Console(formatter);
                     }
                 }
-                catch (Exception)
-                {
-                    Console.WriteLine($"wrong log formatter: {formatterName}. use CompactJsonFormatter instead.")
-                    ; // go thru and write to console with default formatter                    
-                }
+            }
+            catch (Exception e)
+            {
+                // go thru and use the default formatter if something went wrong
+                Console.WriteLine($"wrong log formatter: {formatterName}. The default formatter is used instead. {e.ToString()}");
             }
 
-            return loggerSinkConfiguration.Console(new CompactJsonFormatter());
+            // use default Formatter (JsonFormatter)
+            return loggerSinkConfiguration.Console();
         }
     }
 }
