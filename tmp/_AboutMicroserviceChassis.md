@@ -21,6 +21,7 @@ A chassis provides functionalities which are common to all (or at least multiple
 * (security?)
 * (support circuit breaking)
 * (graceful termination on SIGTERM)
+* (set semver)
 
 A chassis also provide app specific functionalities such as:
 

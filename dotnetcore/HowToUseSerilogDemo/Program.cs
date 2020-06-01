@@ -11,50 +11,59 @@ using Serilog.Formatting.Compact;
 
 namespace SerilogDemo
 {
-  /// <summary>
-  /// 
-  /// </summary>
-  public class Program
-  {
-    public static int Main(string[] args)
+    /// <summary>
+    /// 
+    /// </summary>
+    public class Program
     {
-      try
-      {
-        CreateHostBuilder(args).Build().Run();
-        return 0;
-      }
-      catch (Exception ex)
-      {
-        if (Log.Logger == null || Log.Logger.GetType().Name == "SilentLogger")
+        public static int Main(string[] args)
         {
-          Log.Logger = new LoggerConfiguration()
-                        .MinimumLevel.Debug()
-                        .WriteTo.Console()
-                        .CreateLogger();
-        }
-        Log.Fatal(ex, "Host terminated unexpectedly");
-        return 1;
-      }
-      finally
-      {
-        Log.CloseAndFlush();
-      }
-    }
+            try
+            {
+                // setup logger
+                SetupLogger();
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-          Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                  webBuilder.UseStartup<Startup>();
-                })
-                .UseSerilog((hostingContext, loggerConfiguration) =>
-                {
-                  loggerConfiguration
-                    .ReadFrom.Configuration(hostingContext.Configuration);
-                  //.Enrich.WithProperty("AppName", "demop2");
-                  //.Enrich.WithMachineName();
-                  //.Enrich.WithEnvironmentUserName();
-                  //.Enrich.FromLogContext();
-                });
-  }
+                CreateHostBuilder(args).Build().Run();
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Host terminated unexpectedly");
+                return 1;
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
+        }
+
+        /// <summary>
+        /// Setup console logger using Serilog.
+        /// </summary>
+        private static void SetupLogger()
+        {
+            // only supports LOG_[FORMATTER,MIN_LEVEL,MIN_LEVEL_MICROSOFT,MIN_LEVEL_SYSTEM]
+            Func<string, string> env = (key) => Environment.GetEnvironmentVariable(key);
+
+            // setup console logger only
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.ConfiguredTo(env("LOG_IMN_LEVEL"))
+                .MinimumLevel.ConfiguredTo("Microsoft", env("LOG_MIN_LEVEL_MICROSOFT"))
+                .MinimumLevel.ConfiguredTo("System", env("LOG_MIN_LEVEL_SYSTEM"))
+                .Enrich.WithProperty("AppName", AppAssemblyInfo.AppName)
+                .Enrich.WithProperty("Version", AppAssemblyInfo.AppVersion)
+                .Enrich.WithProcessId()
+                .Enrich.WithThreadId()
+                .Enrich.FromLogContext()
+                .WriteTo.ConsoleWithFormatter(env("LOG_FORMATTER"))
+                .CreateLogger();
+        }
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+              Host.CreateDefaultBuilder(args)
+                  .UseSerilog()
+                  .ConfigureWebHostDefaults(webBuilder =>
+                  {
+                      webBuilder.UseStartup<Startup>();
+                  });
+    }
 }
