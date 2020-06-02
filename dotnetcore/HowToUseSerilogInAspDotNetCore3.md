@@ -18,10 +18,6 @@
 - [4. Advanced Topics](#4-advanced-topics)
   - [4.1 Logging on bootstrap](#41-logging-on-bootstrap)
   - [4.2 Logger injection](#42-logger-injection)
-  - [4.3 More properties (user agent, client ip, and so on)](#43-more-properties-user-agent-client-ip-and-so-on)
-  - [4.4 OpenTelemetry](#44-opentelemetry)
-  - [4.5 Use with EFK stack on docker](#45-use-with-efk-stack-on-docker)
-  - [4.6 Use Elastic Common Schema (ECS)](#46-use-elastic-common-schema-ecs)
 - [5. References](#5-references)
 
 ---
@@ -512,6 +508,27 @@ When deploying your app on docker and sending logs to EFK (Elasticsearch, Fluent
 ### 4.6 Use Elastic Common Schema (ECS)
 
 Elastic Common Schema is possibly a new de facto standerd for logging community. <sup>[6](#6)</sup> It is possible to use this format by using `Elastic.CommonSchema.Serilog` package.<sup>[7](#7)</sup>
+
+You can use ECS formatter like this:
+
+```C#
+var logger = new LoggerConfiguration()
+    .WriteTo.Console(new EcsTextFormatter())
+    .CreateLogger();
+```
+
+Or, You can specify it in appsettings.json:
+
+```JSON
+"WriteTo": [
+  {
+    "Name": "Console",
+    "Args": {
+      "formatter": "Elastic.CommonSchema.Serilog.EcsTextFormatter,Elastic.CommonSchema.Serilog"
+    }
+  }
+]
+```
 
 ## 5. References
 

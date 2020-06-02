@@ -21,7 +21,8 @@
       "applicationUrl": "https://localhost:5101;http://localhost:5100",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Production",
-        "LOG_FORMATTER": "Serilog.Formatting.Elasticsearch.ElasticsearchJsonFormatter,Serilog.Formatting.Elasticsearch"
+        "LOG_FORMATTER0": "Serilog.Formatting.Elasticsearch.ElasticsearchJsonFormatter,Serilog.Formatting.Elasticsearch",
+        "LOG_FORMATTER": "Elastic.CommonSchema.Serilog.EcsTextFormatter,Elastic.CommonSchema.Serilog"
       }
     }
   }
