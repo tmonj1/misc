@@ -20,7 +20,8 @@
   - [4.2 Logger injection](#42-logger-injection)
   - [4.3 More properties (user agent, client ip, and so on)](#43-more-properties-user-agent-client-ip-and-so-on)
   - [4.4 OpenTelemetry](#44-opentelemetry)
-  - [4.5 use with EFK stack on docker](#45-use-with-efk-stack-on-docker)
+  - [4.5 Use with EFK stack on docker](#45-use-with-efk-stack-on-docker)
+  - [4.6 Use Elastic Common Schema (ECS)](#46-use-elastic-common-schema-ecs)
 - [5. References](#5-references)
 
 ---
@@ -504,9 +505,13 @@ In the above example, there are not user agent properties nor client IP address.
 
 OpenTelemetry is a future standard for telemetry API and library. ASP.NET Core and other logging tools such as Prometheus will support OpenTelemetry in the near future. <sup>[5](#5)</sup>
 
-### 4.5 use with EFK stack on docker
+### 4.5 Use with EFK stack on docker
 
 When deploying your app on docker and sending logs to EFK (Elasticsearch, Fluentd, and Kibana) stack, just use Console logger with ElasticsearchJsonFormatter. Fluentd log driver on docker collects the console output and sends it to Elasticsearch.
+
+### 4.6 Use Elastic Common Schema (ECS)
+
+Elastic Common Schema is possibly a new de facto standerd for logging community. <sup>[6](#6)</sup> It is possible to use this format by using `Elastic.CommonSchema.Serilog` package.<sup>[7](#7)</sup>
 
 ## 5. References
 
@@ -515,3 +520,5 @@ When deploying your app on docker and sending logs to EFK (Elasticsearch, Fluent
 3. <a name="3">[README.md serilog-formatting-compact @GitHub](https://github.com/serilog/serilog-formatting-compact)</a>
 4. <a name="4">[Serilog Logging Best Practices](https://benfoster.io/blog/serilog-logging-best-practices)</a>
 5. <a name="5">[Improvements in .NET Core 3.0 for troubleshooting and monitoring distributed apps](https://devblogs.microsoft.com/aspnet/improvements-in-net-core-3-0-for-troubleshooting-and-monitoring-distributed-apps/)</a>
+6. <a name=6">[Introducing the Elastic Common Schema](https://www.elastic.co/blog/introducing-the-elastic-common-schema)
+7. <a name=7">(elastic/ecs-dotnet@GitHub)[https://github.com/elastic/ecs-dotnet)
