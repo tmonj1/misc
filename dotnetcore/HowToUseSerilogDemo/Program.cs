@@ -47,7 +47,7 @@ namespace SerilogDemo
 
             // setup console logger only
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.ConfiguredTo(env("LOG_IMN_LEVEL"))
+                .MinimumLevel.ConfiguredTo(env("LOG_MIN_LEVEL"))
                 .MinimumLevel.ConfiguredTo("Microsoft", env("LOG_MIN_LEVEL_MICROSOFT"))
                 .MinimumLevel.ConfiguredTo("System", env("LOG_MIN_LEVEL_SYSTEM"))
                 .Enrich.WithProperty("AppName", AppAssemblyInfo.AppName)
