@@ -18,6 +18,7 @@
 - [4. Advanced Topics](#4-advanced-topics)
   - [4.1 Logging on bootstrap](#41-logging-on-bootstrap)
   - [4.2 Logger injection](#42-logger-injection)
+  - [4.7 Elastic APM Serilog Enricher](#47-elastic-apm-serilog-enricher)
 - [5. References](#5-references)
 
 ---
@@ -529,6 +530,12 @@ Or, You can specify it in appsettings.json:
   }
 ]
 ```
+
+### 4.7 Elastic APM Serilog Enricher
+
+(TBD)
+
+https://github.com/elastic/ecs-dotnet/tree/master/src/Elastic.Apm.SerilogEnricher
 
 ## 5. References
 
