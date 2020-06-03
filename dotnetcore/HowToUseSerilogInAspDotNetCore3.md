@@ -1,5 +1,6 @@
 # How to use Serilog in ASP.NET Core 3
 
+- [- 5. References](#ulli5-referencesliul)
 - [1. Why Serilog?](#1-why-serilog)
 - [2. Setup](#2-setup)
   - [2.1 Create a new ASP.NET Core project](#21-create-a-new-aspnet-core-project)
@@ -9,6 +10,7 @@
 - [3. Configuration](#3-configuration)
   - [3.1 Use appSettings.json](#31-use-appsettingsjson)
   - [3.2 Enable request logging](#32-enable-request-logging)
+  - [3.3 Trim out infrastructure events](#33-trim-out-infrastructure-events)
   - [3.4 Use JSON formatter to enhance log output](#34-use-json-formatter-to-enhance-log-output)
   - [3.5 (Optional) Use Seq](#35-optional-use-seq)
   - [3.6 Use Enricher to get contextual properties](#36-use-enricher-to-get-contextual-properties)
@@ -18,11 +20,14 @@
 - [4. Advanced Topics](#4-advanced-topics)
   - [4.1 Logging on bootstrap](#41-logging-on-bootstrap)
   - [4.2 Logger injection](#42-logger-injection)
+  - [4.3 More properties (user agent, client ip, and so on)](#43-more-properties-user-agent-client-ip-and-so-on)
+  - [4.4 OpenTelemetry](#44-opentelemetry)
+  - [4.5 Use with EFK stack on docker](#45-use-with-efk-stack-on-docker)
+  - [4.6 Use Elastic Common Schema (ECS)](#46-use-elastic-common-schema-ecs)
   - [4.7 Elastic APM Serilog Enricher](#47-elastic-apm-serilog-enricher)
 - [5. References](#5-references)
-
 ---
-  
+ 
 ## 1. Why Serilog?
 
 Although ASP.NET Core has built-in logging system which supports structured logging, **Serilog** is the logging framework of choice because of its benefits as shown below:
@@ -74,7 +79,7 @@ $ dotnet add package Serilog.Sinks.Fluentd  # if needed
 
 Put boilerplate code into your **Program.cs**. The code is explained and excerpt from [here](https://github.com/serilog/serilog-aspnetcore).<sup>[2](#2)</sup>
 
-```C#
+```CSharp
 using Serilog;
 
 public class Program
@@ -134,7 +139,7 @@ Let’s check if everything is OK by running the program at this point. Here is 
 
 Note that the output format has changed. Timestamp and event level properties come in, and log category has gone away (This format comes from Serilog’s default output template). Both this and previous output examples are in ``plain text`` format. You can choose another format. Here is an example for using compact JSON format in console output:
 
-```C#
+```CSharp
 using Serilog.Formatting.Compact;
 
 :
@@ -189,7 +194,7 @@ Setup is done. The next step is configuration. Log providers and their settings 
 
 Here is the modified version. Note that logger creation code which used to be just below the entry point of the main function is gone. Instead of that, the logger is created via configurations (see (2)). There is one more logger in (1), which is only created to report errors at very early stage of bootstrapping.
 
-```C#
+```CSharp
 public static int Main(string[] args)
 {
   try
@@ -267,7 +272,7 @@ Because “MinimumLevel” (minimum output level) is set to “Information”, t
 
 Add ``app.UseSerilogRequestLogging();`` in Configure method in Startup.cs to augment HTTP request logging:
 
-```C#
+```CSharp
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
   if (env.IsDevelopment())
@@ -404,8 +409,8 @@ Here is an explanation of important properties:
 | ConnectionId  | Unique connection Identifier set automatically by Kestrel.                                                      |
 | RequestId     | Unique Request Identifier set automatically by Kestrel in {ConnectionId}:{SerialNumber} format.                 |
 | TraceId       | TraceId is used for identifying unique transaction across multiple components in an microservices application.  |
-| ParentId      | ParentId is used to correlate logs across multiple components.                                                  |
-| SpanId        | Same as above.                                                                                                  |
+| ParentId      | ParentId is the caller's id in the trace context.                                                               |
+| SpanId        | SpanId is the identifier of a span (an entity executing an api) in the trace context.                           |
 
 ### 3.7 Install and use additional Enrichers to augment log output
 
@@ -470,22 +475,21 @@ Note that, `__` is used to separate hierarchy. In Windows, `:` is used instead.
 
 In the above example code, there is no way of getting errors at the very early stage of bootstrap because it takes some time to read appSettings.json to configure our logger. This problem is discussed [here](https://nblumhardt.com/2019/10/serilog-in-aspnetcore-3/).
 
-* After writing the above statements, I rewrite [HowToUseSerilogDemo](https://github.com/tmonj1/misc/tree/master/dotnetcore/HowToUseSerilogDemo) to be able to catch error on bootstrap. One of the side effects of this modification is not to be able to use appsettings.json to configure Serilog. It is still possible to allow some runtime configuration using environment variables or something, but you have to write many lines of custom code for that purpose. In reality, what you can do at most is to pick up some important settings which are expected to be changed according to the runtime envirionment and make them configurable.
+* After writing the above statements, I rewrite [HowToUseSerilogDemo](https://github.com/tmonj1/misc/tree/master/dotnetcore/HowToUseSerilogDemo) to be able to catch error on bootstrap. One of the side effects of this modification is not to be able to use appsettings.json to configure Serilog. It is still possible to allow some runtime configuration using environment variables or something, but you have to write many lines of custom code for that purpose. In reality, what you can do at most is to pick up some important settings which are expected to be changed according to the runtime environment and make them configurable.
 
 ### 4.2 Logger injection
 
-You can use DI to inject Serilog logger to your class. For example, if you have LogTest class with constructor taking a parameter of type ILogger<LogTest> and let the framework to instantiate LogTest, then you will get a Serilog logger via constructor:
+You can use DI to inject Serilog logger to your class. For example, if you have LogTest class with constructor taking a parameter of type ILogger&lt;LogTest> and let the framework to instantiate LogTest, then you will get a Serilog logger via constructor:
 
-```C#
+```CSharp
   public class LogTest : ILogTest
   {
     private readonly ILogger<LogTest> _logger;
     public LogTest(ILogger<LogTest> logger)
     {
-      // get a Serilog logger implementing ILogger<LogTest> interface.
+      // get a Serilog logger implementing ILogger interface.
       _logger = logger;
     }
-
 
     public void Log()
     {
@@ -508,11 +512,11 @@ When deploying your app on docker and sending logs to EFK (Elasticsearch, Fluent
 
 ### 4.6 Use Elastic Common Schema (ECS)
 
-Elastic Common Schema is possibly a new de facto standerd for logging community. <sup>[6](#6)</sup> It is possible to use this format by using `Elastic.CommonSchema.Serilog` package.<sup>[7](#7)</sup>
+Elastic Common Schema is possibly a new de facto standard for logging community. <sup>[6](#6)</sup> It is possible to use this format by using `Elastic.CommonSchema.Serilog` package.<sup>[7](#7)</sup>
 
 You can use ECS formatter like this:
 
-```C#
+```CSharp
 var logger = new LoggerConfiguration()
     .WriteTo.Console(new EcsTextFormatter())
     .CreateLogger();
@@ -544,5 +548,5 @@ https://github.com/elastic/ecs-dotnet/tree/master/src/Elastic.Apm.SerilogEnriche
 3. <a name="3">[README.md serilog-formatting-compact @GitHub](https://github.com/serilog/serilog-formatting-compact)</a>
 4. <a name="4">[Serilog Logging Best Practices](https://benfoster.io/blog/serilog-logging-best-practices)</a>
 5. <a name="5">[Improvements in .NET Core 3.0 for troubleshooting and monitoring distributed apps](https://devblogs.microsoft.com/aspnet/improvements-in-net-core-3-0-for-troubleshooting-and-monitoring-distributed-apps/)</a>
-6. <a name=6">[Introducing the Elastic Common Schema](https://www.elastic.co/blog/introducing-the-elastic-common-schema)
-7. <a name=7">(elastic/ecs-dotnet@GitHub)[https://github.com/elastic/ecs-dotnet)
+6. <a name="6">[Introducing the Elastic Common Schema](https://www.elastic.co/blog/introducing-the-elastic-common-schema)</a>
+7. <a name="7">(elastic/ecs-dotnet@GitHub)[https://github.com/elastic/ecs-dotnet)</a>
