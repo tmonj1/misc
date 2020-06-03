@@ -1,6 +1,5 @@
 # How to use Serilog in ASP.NET Core 3
 
-- [- 5. References](#ulli5-referencesliul)
 - [1. Why Serilog?](#1-why-serilog)
 - [2. Setup](#2-setup)
   - [2.1 Create a new ASP.NET Core project](#21-create-a-new-aspnet-core-project)
@@ -26,8 +25,9 @@
   - [4.6 Use Elastic Common Schema (ECS)](#46-use-elastic-common-schema-ecs)
   - [4.7 Elastic APM Serilog Enricher](#47-elastic-apm-serilog-enricher)
 - [5. References](#5-references)
----
  
+---
+
 ## 1. Why Serilog?
 
 Although ASP.NET Core has built-in logging system which supports structured logging, **Serilog** is the logging framework of choice because of its benefits as shown below:
@@ -461,7 +461,7 @@ The output is like this:
 
 ### 3.9 Override appSettings.json with environment variables
 
-It is possible to override settings in appSettings.json with environment varialbles. For example, `Application` property in `Properties` can be overridden like this:
+It is possible to override settings in appSettings.json with environment variables. For example, `Application` property in `Properties` can be overridden like this:
 
 ```bash
 $ export Serilog__Properties__application=“demo2”  # <- override appSettings.json
@@ -543,10 +543,10 @@ https://github.com/elastic/ecs-dotnet/tree/master/src/Elastic.Apm.SerilogEnriche
 
 ## 5. References
 
-1. <a name="f1">[Logging with .NET Core](https://docs.microsoft.com/en-US/archive/msdn-magazine/2016/april/essential-net-logging-with-net-core)</a>
+1. <a name="1">[Logging with .NET Core](https://docs.microsoft.com/en-US/archive/msdn-magazine/2016/april/essential-net-logging-with-net-core)</a>
 2. <a name="2">[Setting up Serilog in ASP.NET Core 3](https://nblumhardt.com/2019/10/serilog-in-aspnetcore-3/)</a>
 3. <a name="3">[README.md serilog-formatting-compact @GitHub](https://github.com/serilog/serilog-formatting-compact)</a>
 4. <a name="4">[Serilog Logging Best Practices](https://benfoster.io/blog/serilog-logging-best-practices)</a>
 5. <a name="5">[Improvements in .NET Core 3.0 for troubleshooting and monitoring distributed apps](https://devblogs.microsoft.com/aspnet/improvements-in-net-core-3-0-for-troubleshooting-and-monitoring-distributed-apps/)</a>
 6. <a name="6">[Introducing the Elastic Common Schema](https://www.elastic.co/blog/introducing-the-elastic-common-schema)</a>
-7. <a name="7">(elastic/ecs-dotnet@GitHub)[https://github.com/elastic/ecs-dotnet)</a>
+7. <a name="7">[elastic/ecs-dotnet@GitHub](https://github.com/elastic/ecs-dotnet)</a>
