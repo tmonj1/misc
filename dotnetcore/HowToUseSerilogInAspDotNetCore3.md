@@ -475,7 +475,14 @@ Note that, `__` is used to separate hierarchy. In Windows, `:` is used instead.
 
 In the above example code, there is no way of getting errors at the very early stage of bootstrap because it takes some time to read appSettings.json to configure our logger. This problem is discussed [here](https://nblumhardt.com/2019/10/serilog-in-aspnetcore-3/).
 
-* After writing the above statements, I rewrite [HowToUseSerilogDemo](https://github.com/tmonj1/misc/tree/master/dotnetcore/HowToUseSerilogDemo) to be able to catch error on bootstrap. One of the side effects of this modification is not to be able to use appsettings.json to configure Serilog. It is still possible to allow some runtime configuration using environment variables or something, but you have to write many lines of custom code for that purpose. In reality, what you can do at most is to pick up some important settings which are expected to be changed according to the runtime environment and make them configurable.
+* After writing the above statements, I rewrote [HowToUseSerilogDemo](https://github.com/tmonj1/misc/tree/master/dotnetcore/HowToUseSerilogDemo) to be able to catch error on bootstrap. One of the side effects of this fix is to be unable to use appsettings.json to configure Serilog. It is still possible to allow some runtime configuration using environment variables or something, but it takes effort to write more lines of custom code for that purpose. In reality, what you can do at most is to pick up some important settings which are expected to be changed according to the runtime environment and make them configurable (just like I did).
+
+Available environment variables:
+
+* LOG_MIN_LEVEL for Serilog/MinimumLevel/Default
+* LOG_MIN_LEVEL_MICROSOFT for Serilog/MinimumLevel/Override/Microsoft
+* LOG_MIN_LEVEL_SYSTEM for Serilog/MinimumLevel/Override/System
+* LOG_FORMATTER for Serilog/WriteTo Console/Args for Formatter
 
 ### 4.2 Logger injection
 
