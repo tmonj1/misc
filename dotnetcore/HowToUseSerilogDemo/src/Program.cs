@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Serilog.Events;
-using Serilog.Formatting.Compact;
+using SerilogDemo.Logger;
 
 namespace SerilogDemo
 {
@@ -21,7 +21,14 @@ namespace SerilogDemo
             try
             {
                 // setup logger
-                SetupLogger();
+                var versionInfo = Assembly.GetEntryAssembly().GetApplicationVersionInfo();
+                Log.Logger = SerilogConfiguration.ConfigureDefault(loggerConfig => loggerConfig
+                    .Enrich.WithProperty("AppName", versionInfo.Name)
+                    .Enrich.WithProperty("Semver", versionInfo.SemanticVersion)
+#if DEBUG
+                    .WriteTo.SeqWithUrl(Environment.GetEnvironmentVariable("LOG_SEQ_URL"))
+#endif // DEBUG
+                ).CreateLogger();
 
                 CreateHostBuilder(args).Build().Run();
                 return 0;
@@ -37,27 +44,6 @@ namespace SerilogDemo
             }
         }
 
-        /// <summary>
-        /// Setup console logger using Serilog.
-        /// </summary>
-        private static void SetupLogger()
-        {
-            // only supports LOG_[FORMATTER,MIN_LEVEL,MIN_LEVEL_MICROSOFT,MIN_LEVEL_SYSTEM]
-            Func<string, string> env = (key) => Environment.GetEnvironmentVariable(key);
-
-            // setup console logger only
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.ConfiguredTo(env("LOG_MIN_LEVEL"))
-                .MinimumLevel.ConfiguredTo("Microsoft", env("LOG_MIN_LEVEL_MICROSOFT"))
-                .MinimumLevel.ConfiguredTo("System", env("LOG_MIN_LEVEL_SYSTEM"))
-                .Enrich.WithProperty("AppName", AppAssemblyInfo.AppName)
-                .Enrich.WithProperty("Version", AppAssemblyInfo.AppVersion)
-                .Enrich.WithProcessId()
-                .Enrich.WithThreadId()
-                .Enrich.FromLogContext()
-                .WriteTo.ConsoleWithFormatter(env("LOG_FORMATTER"))
-                .CreateLogger();
-        }
         public static IHostBuilder CreateHostBuilder(string[] args) =>
               Host.CreateDefaultBuilder(args)
                   .UseSerilog()

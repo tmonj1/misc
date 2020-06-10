@@ -6,9 +6,25 @@ using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 using Serilog.Formatting;
+using Serilog.Core;
 
 namespace SerilogDemo
 {
+    /// <summary>
+    /// Null sink
+    /// </summary>
+    public class NullSink : ILogEventSink
+    {
+        /// <summary>
+        /// Do nothing.
+        /// </summary>
+        /// <param name="logEvent"></param>
+        public void Emit(LogEvent logEvent) { }
+    }
+
+    /// <summary>
+    /// Extension methods for Serilog
+    /// </summary>
     public static class SerilogLoggerConfigurationExtension
     {
         /// <summary>
@@ -17,8 +33,8 @@ namespace SerilogDemo
         /// <param name="loggerMinimum"></param>
         /// <param name="minLevel">ログ出力レベル。
         /// <para>nullまたは不正な文字列が指定された場合、デフォルトで"Information"レベルに設定されます。</param>
-        /// <returns></returns>
-        public static LoggerConfiguration ConfiguredTo(this LoggerMinimumLevelConfiguration loggerMinimum, string minLevel)
+        /// <returns>LoggerConfiguration</returns>
+        public static LoggerConfiguration DefaultTo(this LoggerMinimumLevelConfiguration loggerMinimum, string minLevel)
         {
             LogEventLevel level;
             if (!string.IsNullOrEmpty(minLevel) && Enum.TryParse(minLevel, true, out level))
@@ -39,8 +55,8 @@ namespace SerilogDemo
         /// <param name="minLevel">ログ出力レベル
         /// <para>nullまたは解釈できない不正な文字列が指定された場合、デフォルトで"Warning"レベルに設定します。
         /// </param>
-        /// <returns></returns>
-        public static LoggerConfiguration ConfiguredTo(this LoggerMinimumLevelConfiguration loggerMinimum, string source, string minLevel)
+        /// <returns>LoggerConfiguration</returns>
+        public static LoggerConfiguration OverrideWith(this LoggerMinimumLevelConfiguration loggerMinimum, string source, string minLevel)
         {
             LogEventLevel level;
             if (string.IsNullOrEmpty(minLevel) || !Enum.TryParse(minLevel, true, out level))
@@ -70,7 +86,7 @@ namespace SerilogDemo
         ///   </list>
         /// </example>
         /// </param>
-        /// <returns></returns>
+        /// <returns>LoggerConfiguration</returns>
         public static LoggerConfiguration ConsoleWithFormatter(this LoggerSinkConfiguration loggerSinkConfiguration, string formatterName)
         {
             try
@@ -107,6 +123,20 @@ namespace SerilogDemo
 
             // use default Formatter (JsonFormatter)
             return loggerSinkConfiguration.Console();
+        }
+
+        /// <summary>
+        /// Sets SEQ sink only if url is provided.
+        /// </summary>
+        /// <param name="loggerSinkConfiguration">LoggerSinkConfiguration</param>
+        /// <param name="url">url for seq.</param>
+        /// <returns>LoggerConfiguration</returns>
+        public static LoggerConfiguration SeqWithUrl(this LoggerSinkConfiguration loggerSinkConfiguration, string url)
+        {
+            // use SEQ if url is specified
+            return string.IsNullOrEmpty(url)
+                ? loggerSinkConfiguration.Sink(new NullSink(), LogEventLevel.Fatal)
+                : loggerSinkConfiguration.Seq(url);
         }
     }
 }

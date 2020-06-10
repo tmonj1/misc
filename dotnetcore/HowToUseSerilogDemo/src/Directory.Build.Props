@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <VersionPrefix>0.4.0</VersionPrefix>
+    <VersionSuffix>alpha</VersionSuffix>
+    <Product>SerilogDemo 1</Product>
+    <Company>Tmj</Company>
+    <Copyright>Copyright © 2020</Copyright>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+</Project>

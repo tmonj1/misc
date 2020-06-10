@@ -38,3 +38,24 @@ $ dotnet add serilog.formatting.elasticsearch
 
 Writing logs to Elasticsearch with Fluentd using Serilog in ASP.NET Core
 https://andrewlock.net/writing-logs-to-elasticsearch-with-fluentd-using-serilog-in-asp-net-core/
+
+## 4. Supported Environment variables
+
+| Name                    | Default       | Available Values                                                           |
+| :---------------------- | :------------ | :------------------------------------------------------------------------- |
+| LOG_MIN_LEVEL           | Information   | Verbose, Debug, Information, Warning, Error, Fatal                         |
+| LOG_MIN_LEVEL_MICROSOFT | Warning       | Verbose, Debug, Information, Warning, Error, Fatal                         |
+| LOG_MIN_LEVEL_SYSTEM    | Warning       | Verbose, Debug, Information, Warning, Error, Fatal                         |
+| LOG_FORMATTER           | JsonFormatter | Elastic.CommonSchema.Serilog.EcsTextFormatter,Elastic.CommonSchema.Serilog |
+
+## 5. Custom Serilog Configurator
+
+```CSharp
+// setup logger
+var versionInfo = Assembly.GetEntryAssembly().GetApplicationVersionInfo();
+Log.Logger = SerilogConfiguration.ConfigureDefault(loggerConfig => loggerConfig
+    .Enrich.WithProperty("AppName", versionInfo.Name)
+    .Enrich.WithProperty("Semver", versionInfo.SemanticVersion)
+    .WriteTo.SeqWithUrl(Environment.GetEnvironmentVariable("LOG_SEQ_URL"))
+).CreateLogger()
+```
