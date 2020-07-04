@@ -381,6 +381,8 @@ In order to send log output to Seq, add Seq entry to WriteTo section in appSetti
 
 Then, run the application and open `http://localhost:5341` using your web browser if you are in a non-proxy network. Seq seems not to support proxy environment, so if your network uses a proxy, you cannot use Seq (at least as of this writing).
 
+If you use Seq from Node.js, the recommended tool is Pino.
+
 ### 3.6 Use Enricher to get contextual properties
 
 The content of log output is now much better than before, but it still lacks some important pieces of information such as “RequestId” etc., which are actually recorded internally by Serilog. These additional properties come from ambient execution context and can be output by enabling logging context as below:
