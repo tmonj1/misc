@@ -78,35 +78,33 @@ namespace SerilogDemo
                       <html>
                       <head><title>test</title>
                       <script>                                                                                               
-                      function sendReq() {                                                                                   
-                        var start = performance.now();
-                        var data =
-                          '{""@t"":""' + (new Date).toISOString() + '"",' +
-                          '""@mt"":""Client Call"",' +
-                          '""X-Request-Id"":""slkdjfsdl""' +
-                          '}';
-                        var r = new XMLHttpRequest();                                                                     
-                        r.open('post', 'http://localhost:5341/api/events/raw?clef');
-                        r.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');                          
-                        r.send(data);
-                        r.addEventListener('load', function(){
-                          console.log(this.response);
-                          var elapsed = (performance.now() - start).toString();
+                      function sendSeqRequest(start) {
+                          var now = new Date();
+                          var r = new XMLHttpRequest();                                                                     
+                          r.open('post', 'http://localhost:5341/api/events/raw?clef');
+                          r.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');                          
+                          var elapsed = 0;
+                          if (start) {
+                            elapsed = (now - start).toString();
+                          }
                           var data =
-                            '{""@t"":""' + (new Date).toISOString() + '"",' +
-                            '""@mt"":""Client Call"",' +
-                            '""X-Request-Id"":""slkdjfsdl"",' +
-                            '""Elapsed"":""' + elapsed + '""}';
-                          var r2 = new XMLHttpRequest();                                                                     
-                          r2.open('post', 'http://localhost:5341/api/events/raw?clef');
-                          r2.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');                          
-                          r2.send(data);
-                        }, false); 
+                            '{""@t"":""' + now.toISOString() + '"",' +
+                            '""@mt"":""Client Call2"",' +
+                            '""X-Request-Id"":""slkdjfsdl""' +
+                            (elapsed ? ',""Elapsed"":""' + elapsed + '""' : '') +
+                            '}';
+                          r.send(data);
+                          if (!start) {
+                            r.addEventListener('load', () => {sendSeqRequest(now);}, false); 
+                          }
+                      }
+                      function sendApiCallLog() {                                                                                   
+                        sendSeqRequest();
                       }
                       </script>
                       <body>
                         test                                                                                                
-                        <button onclick='sendReq()'>test</button>   
+                        <button onclick='sendApiCallLog()'>test</button>   
                       </body>
                       </html>
                     ");
