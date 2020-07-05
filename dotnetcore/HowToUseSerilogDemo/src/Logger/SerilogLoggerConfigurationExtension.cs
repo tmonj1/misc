@@ -131,12 +131,12 @@ namespace SerilogDemo
         /// <param name="loggerSinkConfiguration">LoggerSinkConfiguration</param>
         /// <param name="url">url for seq.</param>
         /// <returns>LoggerConfiguration</returns>
-        public static LoggerConfiguration SeqWithUrl(this LoggerSinkConfiguration loggerSinkConfiguration, string url)
+        public static LoggerConfiguration SeqWithUrl(this LoggerSinkConfiguration loggerSinkConfiguration, string url, string apiKey)
         {
             // use SEQ if url is specified
             return string.IsNullOrEmpty(url)
                 ? loggerSinkConfiguration.Sink(new NullSink(), LogEventLevel.Fatal)
-                : loggerSinkConfiguration.Seq(url);
+                : loggerSinkConfiguration.Seq(serverUrl: url, apiKey: apiKey);
         }
     }
 }

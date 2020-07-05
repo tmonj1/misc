@@ -26,7 +26,9 @@ namespace SerilogDemo
                     .Enrich.WithProperty("AppName", versionInfo.Name)
                     .Enrich.WithProperty("Semver", versionInfo.SemanticVersion)
 #if DEBUG
-                    .WriteTo.SeqWithUrl(Environment.GetEnvironmentVariable("LOG_SEQ_URL"))
+                    .WriteTo.SeqWithUrl(
+                        Environment.GetEnvironmentVariable("LOG_SEQ_URL"),
+                        Environment.GetEnvironmentVariable("LOG_SEQ_APIKEY")) // "9mjWXUIYPanPokRLE4B6"
 #endif // DEBUG
                 ).CreateLogger();
 

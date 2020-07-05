@@ -84,6 +84,7 @@ namespace SerilogDemo
                           var r = new XMLHttpRequest();                                                                     
                           r.open('post', 'http://localhost:5341/api/events/raw?clef');
                           r.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');                          
+                          r.setRequestHeader('X-Seq-ApiKey', 'D4VgsZSpATwpneS7Lvmq');                          
                           var elapsed = 0;
                           if (start) {
                             elapsed = (now - start).toString();
