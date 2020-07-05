@@ -46,6 +46,8 @@ namespace SerilogDemo
         {
             logTest.Log();
 
+            app.UseStaticFiles();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -64,10 +66,50 @@ namespace SerilogDemo
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context =>
+                endpoints.MapGet("/x", async context =>
                 {
-                    Log.Information("/ called.");
+                    Log.Information("/x called.");
                     await context.Response.WriteAsync("Hello World!");
+                });
+
+                endpoints.MapGet("/index.html", async context =>
+                {
+                    await context.Response.WriteAsync(@"
+                      <html>
+                      <head><title>test</title>
+                      <script>                                                                                               
+                      function sendReq() {                                                                                   
+                        var start = performance.now();
+                        var data =
+                          '{""@t"":""' + (new Date).toISOString() + '"",' +
+                          '""@mt"":""Client Call"",' +
+                          '""X-Request-Id"":""slkdjfsdl""' +
+                          '}';
+                        var r = new XMLHttpRequest();                                                                     
+                        r.open('post', 'http://localhost:5341/api/events/raw?clef');
+                        r.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');                          
+                        r.send(data);
+                        r.addEventListener('load', function(){
+                          console.log(this.response);
+                          var elapsed = (performance.now() - start).toString();
+                          var data =
+                            '{""@t"":""' + (new Date).toISOString() + '"",' +
+                            '""@mt"":""Client Call"",' +
+                            '""X-Request-Id"":""slkdjfsdl"",' +
+                            '""Elapsed"":""' + elapsed + '""}';
+                          var r2 = new XMLHttpRequest();                                                                     
+                          r2.open('post', 'http://localhost:5341/api/events/raw?clef');
+                          r2.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');                          
+                          r2.send(data);
+                        }, false); 
+                      }
+                      </script>
+                      <body>
+                        test                                                                                                
+                        <button onclick='sendReq()'>test</button>   
+                      </body>
+                      </html>
+                    ");
                 });
             });
         }
