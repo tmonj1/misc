@@ -77,8 +77,9 @@ namespace SerilogDemo
                     await context.Response.WriteAsync(@"
                       <html>
                       <head><title>test</title>
-                      <script>                                                                                               
+                      <script>
                       function sendSeqRequest(start) {
+                          if (window.seqFailed) return;
                           var now = new Date();
                           var r = new XMLHttpRequest();                                                                     
                           r.open('post', 'http://localhost:5341/api/events/raw?clef');
@@ -90,13 +91,17 @@ namespace SerilogDemo
                           var data =
                             '{""@t"":""' + now.toISOString() + '"",' +
                             '""@mt"":""Client Call2"",' +
-                            '""X-Request-Id"":""slkdjfsdl""' +
-                            (elapsed ? ',""Elapsed"":""' + elapsed + '""' : '') +
+                            '""X-Request-Id"":""slkdjfsdl"",' +
+                            (elapsed ? '""Elapsed"":""' + elapsed + '""' : '') +
                             '}';
                           r.send(data);
                           if (!start) {
                             r.addEventListener('load', () => {sendSeqRequest(now);}, false); 
                           }
+                          var onFailure = (e) => {window.seqFailed = e.type;};
+                          r.addEventListener('error', onFailure);
+                          r.addEventListener('abort', onFailure);
+                          r.addEventListener('timeout', onFailure);
                       }
                       function sendApiCallLog() {                                                                                   
                         sendSeqRequest();
