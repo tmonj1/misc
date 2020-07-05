@@ -57,8 +57,10 @@ namespace SerilogDemo
               options =>
               {
                   // X-Request-Idヘッダを追加
-                  options.EnrichDiagnosticContext =
-                    RequestLoggingEnricher.EnrichWithCustomHeaders("X-Request-Id");
+                  options.EnrichDiagnosticContext = new RequestLoggingEnricher()
+                      .AddCustomHeaders("X-Request-Id", "User-Agent")
+                      .AddHttpVersion()
+                      .Build();
               }
             );
 
@@ -92,6 +94,7 @@ namespace SerilogDemo
                           var data =
                             '{""@t"":""' + now.toISOString() + '"",' +
                             '""@mt"":""Client Call2"",' +
+                            '""Url"":""' + location.href + '"",' +
                             '""X-Request-Id"":""slkdjfsdl"",' +
                             (elapsed ? '""Elapsed"":""' + elapsed + '""' : '') +
                             '}';
