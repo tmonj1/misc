@@ -48,6 +48,7 @@ https://andrewlock.net/writing-logs-to-elasticsearch-with-fluentd-using-serilog-
 | LOG_MIN_LEVEL_SYSTEM    | Warning       | Verbose, Debug, Information, Warning, Error, Fatal                         |
 | LOG_FORMATTER           | JsonFormatter | Elastic.CommonSchema.Serilog.EcsTextFormatter,Elastic.CommonSchema.Serilog |
 | LOG_SEQ_URL             | ""            | http://localhost:5341                                                      |
+| LOG_SEQ_APIKEY          | ""            | published API key                                                          |
 
 ## 5. Custom Serilog Configurator
 
