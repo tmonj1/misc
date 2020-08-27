@@ -1,5 +1,30 @@
 # Microservice Chassis
 
+- [- 8. Resources](#ulli8-resourcesliul)
+- [1. What is chassis](#1-what-is-chassis)
+  - [1.1 Role of chassis](#11-role-of-chassis)
+  - [1.2 Constituents of a chassis](#12-constituents-of-a-chassis)
+  - [1.3 How to use it](#13-how-to-use-it)
+  - [1.4 Supported programming languages (and framework)](#14-supported-programming-languages-and-framework)
+  - [1.5 Supported runtime environments](#15-supported-runtime-environments)
+- [2. Common design principle](#2-common-design-principle)
+  - [2.1 Configurable via conf filles and environment variables](#21-configurable-via-conf-filles-and-environment-variables)
+- [3. C# (ASP.NET Core)](#3-c-aspnet-core)
+  - [3.1 Summary](#31-summary)
+- [4 Node.js](#4-nodejs)
+- [5 Python](#5-python)
+- [6 Independent middleware services](#6-independent-middleware-services)
+  - [6.1 RDB](#61-rdb)
+  - [6.2 NoSQL](#62-nosql)
+  - [6.3 MQ](#63-mq)
+  - [6.4 Distributed cache](#64-distributed-cache)
+  - [6.4 Logging](#64-logging)
+  - [6.5 Metrics](#65-metrics)
+  - [6.6 Distributed tracing](#66-distributed-tracing)
+- [7. Cross-cutting concerns](#7-cross-cutting-concerns)
+- [8. Resources](#8-resources)
+---
+
 ## 1. What is chassis
 
 A `chassis` provides common functionalities which every component consisting of a service
@@ -132,14 +157,11 @@ in the order of following priorities:
 
 ## 7. Cross-cutting concerns
 
-1. app url  
+app url  
   Each service needs to know the app's (NOT the service's) url when generating a link to an endpoint in its service.
   The service cannot know the app url by itself, it is needed to supply the url via configuration file or another means.
 
 ## 8. Resources
 
-* Microservices in Action 
-
-## 9. Footnotes
-
+---
 1. <a name="aaa1">[Official .NET Docker images](https://docs.microsoft.com/ja-jp/dotnet/architecture/microservices/net-core-net-framework-containers/official-net-docker-images)</a>
