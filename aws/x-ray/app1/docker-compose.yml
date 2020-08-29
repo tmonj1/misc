@@ -1,0 +1,31 @@
+version: "3.4"
+
+services:
+  app1:
+    container_name: app1
+    image: app1:0.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - xrayd
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Production"
+      - "ASPNETCORE_URLS=http://*:80"
+      - "AWS_XRAY_DAEMON_ADDRESS=xrayd:2000"
+      #- "AWS_XRAY_CONTEXT_MISSING=LOG_ERROR"
+      #- "AWS_XRAY_TRACING_NAME="
+
+  xrayd:
+    container_name: xrayd
+    image: xray-daemon:latest
+    command: [-o]
+    volumes:
+      - ~/.aws/:/root/.aws/:ro
+    expose:
+      - "2000"
+      - "2000/udp"
+    environment:
+      - "AWS_REGION=ap-northeast-1"
