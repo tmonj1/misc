@@ -1,0 +1,111 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  ClusterBaseName:
+    Type: String
+    Default: x-ray-demo-eks
+
+  TargetRegion:
+    Type: String
+    Default: ap-northeast-1
+
+  AvailabilityZone1:
+    Type: String
+    Default: ap-northeast-1a
+
+  AvailabilityZone2:
+    Type: String
+    Default: ap-northeast-1c
+
+  VpcBlock:
+    Type: String
+    Default: 192.168.0.0/16
+
+  Subnet1Block:
+    Type: String
+    Default: 192.168.0.0/24
+
+  Subnet2Block:
+    Type: String
+    Default: 192.168.1.0/24
+
+Resources:
+  XRayDemoEksVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcBlock
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${ClusterBaseName}-VPC
+
+  Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone1
+      CidrBlock: !Ref Subnet1Block
+      VpcId: !Ref XRayDemoEksVPC
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${ClusterBaseName}-Subnet1
+
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone2
+      CidrBlock: !Ref Subnet2Block
+      VpcId: !Ref XRayDemoEksVPC
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${ClusterBaseName}-Subnet2
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref XRayDemoEksVPC
+
+  SubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref XRayDemoEksVPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ClusterBaseName}-SubnetRouteTable
+
+  SubnetRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref SubnetRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  Subnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet1
+      RouteTableId: !Ref SubnetRouteTable
+
+  Subnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet2
+      RouteTableId: !Ref SubnetRouteTable
+
+Outputs:
+  VPC:
+    Value: !Ref XRayDemoEksVPC
+
+  Subnets:
+    Value: !Join
+      - ","
+      - [!Ref Subnet1, !Ref Subnet2]
+
+  RouteTable:
+    Value: !Ref SubnetRouteTable

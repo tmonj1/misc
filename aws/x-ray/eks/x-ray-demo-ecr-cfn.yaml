@@ -1,0 +1,39 @@
+Parameters:
+  repoNameApp1:
+    Type: String
+    Default: tmj/x-ray-demo-app1
+  repoNameApp2:
+    Type: String
+    Default: tmj/x-ray-demo-app2
+Resources:
+  RepoApp1:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Ref repoNameApp1
+  RepoApp2:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Ref repoNameApp2
+Outputs:
+  Arn:
+    Value: !Join
+      - ","
+      - [!GetAtt RepoApp1.Arn, !GetAtt RepoApp2.Arn]
+  Uri1:
+    Value: !Join
+      - "."
+      - [
+          !Ref "AWS::AccountId",
+          "dkr.ecr",
+          !Ref "AWS::Region",
+          !Join ["/", ["amazonaws.com", !Ref "repoNameApp1"]],
+        ]
+  Uri2:
+    Value: !Join
+      - "."
+      - [
+          !Ref "AWS::AccountId",
+          "dkr.ecr",
+          !Ref "AWS::Region",
+          !Join ["/", ["amazonaws.com", !Ref "repoNameApp2"]],
+        ]
