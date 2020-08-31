@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: x-ray-demo-app
+  labels:
+    app: x-ray-demo-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: x-ray-demo-app
+  template:
+    metadata:
+      labels:
+        app: x-ray-demo-app
+    spec:
+      containers:
+        - name: x-ray-demo-app
+          image: ${ECR_HOST}/tmj/x-ray-demo-app1:0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /health
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /health
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 250m
+              memory: 768Mi
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 2"]

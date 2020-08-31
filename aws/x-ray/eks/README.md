@@ -5,7 +5,7 @@ ECR レジストリに App1 と App2 のイメージを登録。
 ```bash
 # 準備
 $ export AWS_ACCOUNT_ID=372853230800
-# ECR レジストリの作成
+# ECRリポジトリの作成
 $ aws cloudformation create-stack --stack-name x-ray-demo-ecr-repos --template-body file://x-ray-demo-ecr-cfn.yaml
 {
     "StackId": "arn:aws:cloudformation:ap-northeast-1:<aws_account_id>:stack/x-ray-demo-ecr-repos/8d65aa10-eb07-11ea-a24d-06d571b61710"
@@ -14,9 +14,18 @@ $ aws cloudformation create-stack --stack-name x-ray-demo-ecr-repos --template-b
 $ aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
 Login Succeeded
 # App1 イメージにタグを打つ
-$ docker tag app1:0.1 ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/tmj/x-ray-demo-app1:0.1
+$ docker tag app1:0.1 ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/tmj/x-ray-demo-app1:0.1
 # App1 イメージを ECR に push
-$ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/tmj/x-ray-demo-app1:0.1
+$ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/tmj/x-ray-demo-app1:0.1
+The push refers to repository [<aws_account_id>.dkr.ecr.ap-northeast-1.amazonaws.com/tmj/x-ray-demo-app1]
+66db7cdbecc2: Pushed 
+d605ac5fa9d8: Pushed 
+2e849d361dc1: Pushed 
+c370033eb984: Pushed 
+2135da4d457a: Pushed 
+b24b2d7a1887: Pushed 
+d0f104dc0a1f: Pushed 
+0.1: digest: sha256:bd0fbf507c256a5576b048bfb38ea9fb235267b9e66ff2c19543e84bad73c1b9 size: 1792
 # 同様に App2 も push
 $ (省略)
 ```
@@ -31,7 +40,7 @@ $ aws cloudformation create-stack --stack-name x-ray-demo-eks-base --template-bo
 #確認
 $ aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE
 (出力結果省略) 
-#出力の取得
+#出力の取得 (%%%subnetIdは手作業なしで引き渡せるようにすべき)
 $ aws cloudformation describe-stacks --stack-name x-ray-demo-eks-base --query Stacks[].Outputs[]
 [
     {
@@ -99,7 +108,48 @@ ip-192-168-0-180.ap-northeast-1.compute.internal   Ready    <none>   9m43s   v1.
 * eksctl は内部的には CloudFormation を使ってクラスターを構築している。このため、CloudFormation のコンソール画面から構築状況が確認できる。
 * eksctl でクラスターを作ると、作成したクラスターがカレントコンテキストになるようにkubeconfigも更新される。
 
-## 3.2 作成したクラスターの確認
+## 3.2 作成したクラスターの構成確認
+
+### (1) クラスターの情報
+
+```bash
+#クラスターのマスターサービスとクラスターサービス (CoreDNS) のアドレスを取得
+$ kubectl cluster-info
+Kubernetes master is running at https://46FBBF6C50D0CE7FD0AEEFA34A3EA24D.gr7.ap-northeast-1.eks.amazonaws.com
+CoreDNS is running at https://46FBBF6C50D0CE7FD0AEEFA34A3EA24D.gr7.ap-northeast-1.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+#クラスター名を取得
+$ eksctl get cluster
+NAME                    REGION
+x-ray-demo-cluster      ap-northeast-1
+
+#クラスターのノードグループの情報を取得
+$ eksctl get nodegroups --cluster x-ray-demo-cluster -o yaml
+- Cluster: x-ray-demo-cluster
+  CreationTime: "2020-08-31T10:20:37.253Z"
+  DesiredCapacity: 1
+  ImageID: ami-048669b0687eb3ad4
+  InstanceType: t2.small
+  MaxSize: 2
+  MinSize: 1
+  Name: x-ray-demo-nodegroup
+  NodeInstanceRoleARN: arn:aws:iam::<aws_account_id>:role/eksctl-x-ray-demo-cluster-nodegro-NodeInstanceRole-1UG2OG9O7B4RS
+  StackName: eksctl-x-ray-demo-cluster-nodegroup-x-ray-demo-nodegroup
+
+#ノードの情報を取得
+$ kubectl get node (-o yaml)
+NAME                                              STATUS   ROLES    AGE    VERSION
+ip-192-168-1-36.ap-northeast-1.compute.internal   Ready    <none>   158m   v1.17.9-eks-4c6976
+
+#ノードがどのEC2インスタンスで動作しているか (see https://github.com/weaveworks/eksctl/issues/509)
+$ kubectl get nodes ip-192-168-1-36.ap-northeast-1.compute.internal -o jsonpath="{.spec.providerID}"
+aws:///ap-northeast-1c/i-04a8c1e1ac2bdb122
+```
+(TBD)
+* security group は勝手に作られるらしい？大丈夫なの？
+* インスタンスプロファイルも勝手に作られるらしい？指定できないの？
+
+## 3.3 Podのデプロイ確認
 
 確認のため、Nginx 1個だけを含むテスト Pod をデプロイしてみる。
 
@@ -127,14 +177,15 @@ pod "nginx-pod" deleted
 #Namespaceの作成
 $ kubectl apply -f x-ray-demo-ns.yaml
 #作成したNamespaceにコンテキストを設定
-$ kubectl config set-context x-ray-demo-ns --cluster <CLUSTER>
+$ kubectl config set-context x-ray-demo-ns --cluster <CLUSTER> --user <AUTHINFO>
 ```
 
 ### 4.2 アプリケーションのデプロイ
 
-(TBD)
 
 ```bash
+$ export ECR_HOST=${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
+$ envsubst < x-ray-demo-apps-deploy.yaml | kubectl apply -f -
 ```
 
 ## 5. 後始末
@@ -142,6 +193,8 @@ $ kubectl config set-context x-ray-demo-ns --cluster <CLUSTER>
 ```bash
 #ECRリポジトリの削除
 $ aws cloudformation delete-stack --stack-name x-ray-demo-ecr-repos
+#デプロイの削除
+$ kubectl delete deploy x-ray-demo-app
 #EKSクラスターの削除
 $ eksctl delete cluster -f x-ray-cluster-eksctl.yaml
 #AWSベースリソースの削除
