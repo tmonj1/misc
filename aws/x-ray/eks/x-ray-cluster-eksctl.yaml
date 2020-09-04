@@ -9,8 +9,8 @@ metadata:
 vpc:
   subnets:
     public:
-      ap-northeast-1a: { id: subnet-06766c03dfbfeb0a7 }
-      ap-northeast-1c: { id: subnet-00c92a697e9f1bbc2 }
+      ap-northeast-1a: { id: subnet-09aeb0bc8c8d0bf96 }
+      ap-northeast-1c: { id: subnet-008e473682444496b }
 
 nodeGroups:
   - name: x-ray-demo-nodegroup

@@ -40,7 +40,7 @@ $ aws cloudformation create-stack --stack-name x-ray-demo-eks-base --template-bo
 #確認
 $ aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE
 (出力結果省略) 
-#出力の取得 (%%%subnetIdは手作業なしで引き渡せるようにすべき)
+#出力の取得
 $ aws cloudformation describe-stacks --stack-name x-ray-demo-eks-base --query Stacks[].Outputs[]
 [
     {
@@ -148,6 +148,8 @@ aws:///ap-northeast-1c/i-04a8c1e1ac2bdb122
 (TBD)
 * security group は勝手に作られるらしい？大丈夫なの？
 * インスタンスプロファイルも勝手に作られるらしい？指定できないの？
+* custom security hardened AMIは使えない？
+see [EKS入門者向けに「今こそ振り返るEKSの基礎」というタイトルで登壇しました](https://dev.classmethod.jp/articles/eks_basic/)
 
 ## 3.3 Podのデプロイ確認
 
@@ -200,3 +202,19 @@ $ eksctl delete cluster -f x-ray-cluster-eksctl.yaml
 #AWSベースリソースの削除
 $ aws cloudformation delete-stack --stack-name x-ray-demo-eks-base
 ```
+
+---
+
+## A1. VPCの要件
+
+### (1) クラスターVPCの要件 (Required)
+
+  * サブネット
+    * サブネット2つ以上、内1つはpublic (推奨: private と public それぞれ1個以上)
+  * ネットワーク
+    * 外部用ALB用にpublicサブネットが必要
+    * デフォルトでは、クラスターイントロスペクションと起動時のノード登録のため、ノードにもoutboundのインターネットアクセスが必要
+    * Dockerイメージ取得のため、ノードに outbound のインターネットアクセスとS3アクセスが必要
+
+source:
+  Cluster VPC consideration
