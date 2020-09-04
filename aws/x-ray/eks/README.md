@@ -179,7 +179,11 @@ pod "nginx-pod" deleted
 #Namespaceの作成
 $ kubectl apply -f x-ray-demo-ns.yaml
 #作成したNamespaceにコンテキストを設定
-$ kubectl config set-context x-ray-demo-ns --cluster <CLUSTER> --user <AUTHINFO>
+#kubectl config set-context x-ray-demo --cluster <CLUSTER> --user <AUTHINFO> --namespace x-ray-demo-ns
+$ kubectl config set-context x-ray-demo --cluster x-ray-demo-cluster.ap-northeast-1.eksctl.io \
+ --user monji@x-ray-demo-cluster.ap-northeast-1.eksctl.io --namespace x-ray-demo-ns
+#カレントコンテキストを変更
+$ kubectl config use-context x-ray-demo
 ```
 
 ### 4.2 アプリケーションのデプロイ
@@ -187,7 +191,7 @@ $ kubectl config set-context x-ray-demo-ns --cluster <CLUSTER> --user <AUTHINFO>
 
 ```bash
 $ export ECR_HOST=${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
-$ envsubst < x-ray-demo-apps-deploy.yaml | kubectl apply -f -
+$ envsubst < x-ray-demo-apps-deploy.template.yaml | kubectl apply -f -
 ```
 
 ## 5. 後始末

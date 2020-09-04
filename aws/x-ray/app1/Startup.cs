@@ -18,11 +18,11 @@ namespace app1
     {
         public Startup(IConfiguration configuration)
         {
-            // XRayRecorderの初期化
-            AWSXRayRecorder.InitializeInstance(configuration);
+            // (App Mesh時はコメントアウト) XRayRecorderの初期化
+            // AWSXRayRecorder.InitializeInstance(configuration);
 
-            // SDKリクエストをすべてトレース対象とする
-            AWSSDKHandler.RegisterXRayForAllServices();
+            // (App Mesh時はコメントアウト) SDKリクエストをすべてトレース対象とする
+            // AWSSDKHandler.RegisterXRayForAllServices();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -35,7 +35,7 @@ namespace app1
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             // X-Rayミドルウェアを追加
-            app.UseXRay("app1");
+            // app.UseXRay("app1");
 
             if (env.IsDevelopment())
             {
