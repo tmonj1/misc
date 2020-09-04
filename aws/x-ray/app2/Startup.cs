@@ -36,11 +36,11 @@ namespace app2
         {
             services.AddControllersWithViews();
 
-            // (App Mesh時はコメントアウト)
-            // services.AddHttpClient("xray").ConfigurePrimaryHttpMessageHandler(() =>
-            // {
-            //     return new HttpClientXRayTracingHandler(new HttpClientHandler());
-            // });
+            // (App Mesh時はコメントアウトしたいがControllerでも参照しているので残しておく)
+            services.AddHttpClient("xray").ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                return new HttpClientXRayTracingHandler(new HttpClientHandler());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

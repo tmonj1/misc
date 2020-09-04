@@ -1,3 +1,14 @@
+## 0. Docker イメージ作成
+
+```bash
+# App1 のイメージの作成 (ビルドもこの中で実行される)
+$ cd app1
+$ docker build -t app1:0.1 .
+# App2 も同様に実行
+$ cd app2
+$ docker build -t app2:0.1 .
+```
+
 ## 1. Docker イメージの ECR への登録
 
 ECR レジストリに App1 と App2 のイメージを登録。
