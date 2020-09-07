@@ -157,9 +157,9 @@ $ kubectl get nodes ip-192-168-1-36.ap-northeast-1.compute.internal -o jsonpath=
 aws:///ap-northeast-1c/i-04a8c1e1ac2bdb122
 ```
 (TBD)
-* security group は勝手に作られるらしい？大丈夫なの？
-* インスタンスプロファイルも勝手に作られるらしい？指定できないの？
-* custom security hardened AMIは使えない？
+* security group は勝手に作られるらしい？大丈夫なの？ -> 指定可能
+* インスタンスプロファイルも勝手に作られるらしい？指定できないの？ -> 指定可能
+* custom security hardened AMIは使えない？ -> 使える
 see [EKS入門者向けに「今こそ振り返るEKSの基礎」というタイトルで登壇しました](https://dev.classmethod.jp/articles/eks_basic/)
 
 ## 3.3 Podのデプロイ確認
@@ -211,7 +211,8 @@ $ envsubst < x-ray-demo-apps-deploy.template.yaml | kubectl apply -f -
 #ECRリポジトリの削除
 $ aws cloudformation delete-stack --stack-name x-ray-demo-ecr-repos
 #デプロイの削除
-$ kubectl delete deploy x-ray-demo-app
+$ kubectl delete deploy app1
+$ kubectl delete deploy app1
 #EKSクラスターの削除
 $ eksctl delete cluster -f x-ray-cluster-eksctl.yaml
 #AWSベースリソースの削除
@@ -233,3 +234,32 @@ $ aws cloudformation delete-stack --stack-name x-ray-demo-eks-base
 
 source:
   Cluster VPC consideration
+
+---
+* `appmesh.k8s.aws/sidecarInjectorWebhook: enabled` を namespace の `metadata.labels` に設定すると、この ns 下で作成された Pod には自動的に Envoy proxy が注入される。
+  * 出典: [Using sidecar injection on Amazon EKS with AWS App Mesh](https://aws.amazon.com/jp/blogs/containers/using-sidecar-injection-on-amazon-eks-with-aws-app-mesh/)
+* kubernetes で LoadBalancer タイプで Service を作成すると、NLB が直接 Pod (実際にはDeployment) に接続するのではなく、間に ClusterIP のサービス(?) が追加されているようだ。たとえば、ポート80:5000でNLBを作ると、80:32644 のように30,000番台のポート番号の何者かに転送する形で作られる（このポート番号は勝手に振られる）。その後、NLBとPodの間に追加されたClusterIPサービスにより32644から5000に再度マッピングされるようだ。
+* [Configure App Mesh integration with Kubernetes](https://docs.aws.amazon.com/eks/latest/userguide/mesh-k8s-integration.html#configure-app-mesh) で X-Ray 出力できるか試してみる
+  * service-a は app1-svcとapp2-svc に置換
+  * helm upgrade のところで `--set tracing.enable=true` と `--set tracing.provider=x-ray` を追加
+    * 出典: [eks-charts の GitHub のREADME.md](https://github.com/aws/eks-charts/tree/master/stable/appmesh-controller)
+  ---
+  #下記はうまく行かなかった (`helm upgrade` で `--set tracing.provider=x-ray` を追加)
+  helm upgrade -i appmesh-controller eks/appmesh-controller     --namespace appmesh-system     --set region=$AWS_REGION     --set serviceAccount.create=false     --set serviceAccount.name=appmesh-controller --set tracing.enabled=true --set tracing.provider=x-ray
+  #下記もダメ
+  helm upgrade -i appmesh-inject eks/appmesh-inject \
+--namespace appmesh-system \
+--set mesh.name=my-mesh \
+--set mesh.create=false \
+--set tracing.enabled=true \
+--set tracing.provider=x-ray
+  ---
+  eksctl create iamserviceaccount \
+    --cluster $CLUSTER_NAME \
+    --namespace x-ray-demo-ns \
+    --name my-service-a \
+    --attach-policy-arn  arn:aws:iam::372853230800:policy/x-ray-demo-policy \
+    --override-existing-serviceaccounts \
+    --approve
+
+    

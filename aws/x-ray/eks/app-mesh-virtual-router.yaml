@@ -1,20 +1,41 @@
 apiVersion: appmesh.k8s.aws/v1beta2
 kind: VirtualRouter
 metadata:
-  namespace: my-apps
-  name: my-service-a-virtual-router
+  namespace: x-ray-demo-ns
+  name: app1-svc-virtual-router
 spec:
   listeners:
     - portMapping:
-        port: 80
+        port: 2080
         protocol: http
   routes:
-    - name: my-service-a-route
+    - name: app1-svc-route
       httpRoute:
         match:
           prefix: /
         action:
           weightedTargets:
             - virtualNodeRef:
-                name: my-service-a
+                name: app1-svc
+              weight: 1
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualRouter
+metadata:
+  namespace: x-ray-demo-ns
+  name: app2-svc-virtual-router
+spec:
+  listeners:
+    - portMapping:
+        port: 80
+        protocol: http
+  routes:
+    - name: app2-svc-route
+      httpRoute:
+        match:
+          prefix: /
+        action:
+          weightedTargets:
+            - virtualNodeRef:
+                name: app2-svc
               weight: 1
