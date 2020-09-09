@@ -16,10 +16,13 @@ spec:
     spec:
       containers:
         - name: app1
-          image: ${ECR_HOST}/tmj/x-ray-demo-app1:0.1
+          image: ${AWS_ECR_URL}/tmj/x-ray-demo-app1:0.2
           imagePullPolicy: Always
           ports:
             - containerPort: 80
+          env:
+            - name: AWS_XRAY_DAEMON_ADDRESS
+              value: xray-service.amazon-cloudwatch
           readinessProbe:
             httpGet:
               port: 80
@@ -62,10 +65,13 @@ spec:
     spec:
       containers:
         - name: app2
-          image: ${ECR_HOST}/tmj/x-ray-demo-app2:0.1
+          image: ${AWS_ECR_URL}/tmj/x-ray-demo-app2:0.2
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
+          env:
+            - name: AWS_XRAY_DAEMON_ADDRESS
+              value: xray-service.amazon-cloudwatch
           readinessProbe:
             httpGet:
               port: 5000

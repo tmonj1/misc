@@ -3,6 +3,6 @@ kind: Namespace
 metadata:
   name: x-ray-demo-ns
   # added for App Mesh
-  labels:
-    mesh: my-mesh
-    appmesh.k8s.aws/sidecarInjectorWebhook: enabled
+  # labels:
+  #   mesh: my-mesh
+  #   appmesh.k8s.aws/sidecarInjectorWebhook: enabled

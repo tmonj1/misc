@@ -1,0 +1,133 @@
+# create amazon-cloudwatch namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: amazon-cloudwatch
+  labels:
+    name: amazon-cloudwatch
+---
+# create cwagent service account and role binding
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudwatch-agent
+  namespace: amazon-cloudwatch
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cloudwatch-agent-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes", "endpoints"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes/proxy"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["nodes/stats", "configmaps", "events"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["cwagent-clusterleader"]
+    verbs: ["get", "update"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cloudwatch-agent-role-binding
+subjects:
+  - kind: ServiceAccount
+    name: cloudwatch-agent
+    namespace: amazon-cloudwatch
+roleRef:
+  kind: ClusterRole
+  name: cloudwatch-agent-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluentd
+  namespace: amazon-cloudwatch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fluentd-role
+rules:
+  - apiGroups: [""]
+    resources:
+      - namespaces
+      - pods
+      - pods/logs
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fluentd-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fluentd-role
+subjects:
+  - kind: ServiceAccount
+    name: fluentd
+    namespace: amazon-cloudwatch
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: xrayd
+  namespace: amazon-cloudwatch
+
+---
+# create role binding for XRay SDK to read config map
+apiVersion: rbac.authorization.k8s.io/v1
+#kind: Role
+kind: ClusterRole
+metadata:
+  name: container-insights-discovery-role
+  namespace: amazon-cloudwatch
+rules:
+  - apiGroups:
+      - ""
+    resourceNames:
+      - cluster-info
+    resources:
+      - configmaps
+    verbs:
+      - get
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+#kind: RoleBinding
+kind: ClusterRoleBinding
+metadata:
+  name: service-users-cloudwatch-discovery-role-binding
+  namespace: amazon-cloudwatch
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  #  kind: Role
+  kind: ClusterRole
+  name: container-insights-discovery-role
+subjects:
+  - kind: ServiceAccount
+    name: xrayd
+    namespace: amazon-cloudwatch
+#  - apiGroup: rbac.authorization.k8s.io
+#    kind: Group
+#    name: system:serviceaccounts

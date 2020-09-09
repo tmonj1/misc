@@ -3,10 +3,10 @@
 ```bash
 # App1 のイメージの作成 (ビルドもこの中で実行される)
 $ cd app1
-$ docker build -t app1:0.1 .
+$ docker build -t app1:0.2 .
 # App2 も同様に実行
 $ cd app2
-$ docker build -t app2:0.1 .
+$ docker build -t app2:0.2 .
 ```
 
 ## 1. Docker イメージの ECR への登録
@@ -16,6 +16,7 @@ ECR レジストリに App1 と App2 のイメージを登録。
 ```bash
 # 準備
 $ export AWS_ACCOUNT_ID=372853230800
+$ export AWS_ECR_URL=${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
 # ECRリポジトリの作成
 $ aws cloudformation create-stack --stack-name x-ray-demo-ecr-repos --template-body file://x-ray-demo-ecr-cfn.yaml
 {
@@ -25,9 +26,9 @@ $ aws cloudformation create-stack --stack-name x-ray-demo-ecr-repos --template-b
 $ aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
 Login Succeeded
 # App1 イメージにタグを打つ
-$ docker tag app1:0.1 ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/tmj/x-ray-demo-app1:0.1
+$ docker tag app1:0.2 ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/tmj/x-ray-demo-app1:0.2
 # App1 イメージを ECR に push
-$ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/tmj/x-ray-demo-app1:0.1
+$ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/tmj/x-ray-demo-app1:0.2
 The push refers to repository [<aws_account_id>.dkr.ecr.ap-northeast-1.amazonaws.com/tmj/x-ray-demo-app1]
 66db7cdbecc2: Pushed 
 d605ac5fa9d8: Pushed 
@@ -197,12 +198,75 @@ $ kubectl config set-context x-ray-demo --cluster x-ray-demo-cluster.ap-northeas
 $ kubectl config use-context x-ray-demo
 ```
 
-### 4.2 アプリケーションのデプロイ
-
+### 4.2 サービスアカウントの作成
 
 ```bash
-$ export ECR_HOST=${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
+#K8sのサービスアカウントとOIDCプロバイダーを関連付ける
+$ eksctl utils associate-iam-oidc-provider --cluster x-ray-demo-cluster --approve
+#サービスアカウントの作成
+$ kubectl apply -f x-ray-base.yaml
+#確認
+$ kubectl -n amazon-cloudwatch get sa 
+NAME               SECRETS   AGE
+cloudwatch-agent   1         68s
+default            1         68s
+fluentd            1         68s
+xrayd              1         68s
+```
+
+### 4.3 サービスアカウントとIAMとの紐付け
+
+```bash
+#クラスターのOIDCプロバイダー機能を有効化
+$ eksctl utils associate-iam-oidc-provider --name x-ray-demo-cluster --approve
+#確認
+$ aws eks describe-cluster --name x-ray-demo-cluster --region ${AWS_REGION} --query "cluster.identity.oidc.issuer" --output text
+https://oidc.eks.ap-northeast-1.amazonaws.com/id/B85F6C1F624724CDB78146BD04D8B039
+#サービスアカウントとIAMロールの紐付け
+$ eksctl create iamserviceaccount --name fluentd \
+  --namespace amazon-cloudwatch \
+  --cluster x-ray-demo-cluster \
+  --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy \
+  --approve \
+  --override-existing-serviceaccounts
+
+$ eksctl create iamserviceaccount --name cloudwatch-agent \
+  --namespace amazon-cloudwatch \
+  --cluster x-ray-demo-cluster \
+  --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy \
+  --approve \
+  --override-existing-serviceaccounts
+
+$ eksctl create iamserviceaccount --name xrayd \
+  --namespace amazon-cloudwatch \
+  --cluster x-ray-demo-cluster \
+  --attach-policy-arn arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess \
+  --approve \
+  --override-existing-serviceaccounts
+```
+
+### 4.4 CloudWatch, FluentD, X-Rayのデーモンを実行
+
+```bash
+#Daemonsetとして実行
+$ kubectl apply -f cloudwatch-fluentd-xray.yaml
+```
+
+### 4.5 サービスのデプロイ
+
+```bash
+#App1とApp2のデプロイ
 $ envsubst < x-ray-demo-apps-deploy.template.yaml | kubectl apply -f -
+#Serviceの公開 (ELB -> App2 -> App1)
+$ kubectl apply -f x-ray-demo-apps-svc.yaml
+#サービスのURLを取得
+$ kubectl get svc
+NAME       TYPE           CLUSTER-IP       EXTERNAL-IP                                                                    PORT(S)        AGE
+app1-svc   ClusterIP      10.100.4.31      <none>                                                                         2080/TCP       10m
+app2-svc   LoadBalancer   10.100.167.232   a26d871d0f6524f58bbbca197b539f18-1736671221.ap-northeast-1.elb.amazonaws.com   80:31485/TCP   10m
+#サービスの実行確認 (ヘルスチェックURLで確認)
+$ curl a26d871d0f6524f58bbbca197b539f18-1736671221.ap-northeast-1.elb.amazonaws.com/health
+ok
 ```
 
 ## 5. 後始末
@@ -212,7 +276,13 @@ $ envsubst < x-ray-demo-apps-deploy.template.yaml | kubectl apply -f -
 $ aws cloudformation delete-stack --stack-name x-ray-demo-ecr-repos
 #デプロイの削除
 $ kubectl delete deploy app1
-$ kubectl delete deploy app1
+$ kubectl delete deploy app2
+#デーモンセットの削除
+$ kubectl delete -f cloudwatch-fluentd-xray.yaml
+#IAMサービスアカウントの削除
+$ eksctl delete iamserviceaccount --cluster x-ray-demo-cluster cloudwatch-agent
+$ eksctl delete iamserviceaccount --cluster x-ray-demo-cluster fluentd
+$ eksctl delete iamserviceaccount --cluster x-ray-demo-cluster xrayd
 #EKSクラスターの削除
 $ eksctl delete cluster -f x-ray-cluster-eksctl.yaml
 #AWSベースリソースの削除

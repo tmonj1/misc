@@ -9,8 +9,8 @@ metadata:
 vpc:
   subnets:
     public:
-      ap-northeast-1a: { id: subnet-0e43f31c4126507ae }
-      ap-northeast-1c: { id: subnet-07719b24c3089a60d }
+      ap-northeast-1a: { id: subnet-058ecd35d42d6516a }
+      ap-northeast-1c: { id: subnet-068a2568991910099 }
 
 nodeGroups:
   - name: x-ray-demo-nodegroup
@@ -19,12 +19,12 @@ nodeGroups:
     minSize: 1
     maxSize: 2
     volumeSize: 20
-#    iam:
-#      withAddonPolicies:
-#        albIngress: true
-#        autoscaler: true
-#        xray: true
-#        cloudwatch: true
+    iam:
+      withAddonPolicies:
+        #        albIngress: true
+        #        autoscaler: true
+        xray: true
+        cloudwatch: true
 #        appMesh: true
 #        appMeshPreview: true
 #      ssh:

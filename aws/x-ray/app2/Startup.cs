@@ -23,10 +23,10 @@ namespace app2
             Configuration = configuration;
 
             // (App Mesh時はコメントアウト) XRayRecorderの初期化
-            // AWSXRayRecorder.InitializeInstance(configuration);
+            AWSXRayRecorder.InitializeInstance(configuration);
 
             // (App Mesh時はコメントアウト) SDKリクエストをすべてトレース対象とする
-            // AWSSDKHandler.RegisterXRayForAllServices();
+            AWSSDKHandler.RegisterXRayForAllServices();
         }
 
         public IConfiguration Configuration { get; }
@@ -46,7 +46,7 @@ namespace app2
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // app.UseXRay("app2");
+            app.UseXRay("app2");
 
             if (env.IsDevelopment())
             {

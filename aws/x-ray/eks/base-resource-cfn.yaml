@@ -5,10 +5,6 @@ Parameters:
     Type: String
     Default: x-ray-demo-eks
 
-  TargetRegion:
-    Type: String
-    Default: ap-northeast-1
-
   AvailabilityZone1:
     Type: String
     Default: ap-northeast-1a
@@ -19,15 +15,15 @@ Parameters:
 
   VpcBlock:
     Type: String
-    Default: 192.168.0.0/16
+    Default: 172.32.16.0/16
 
   Subnet1Block:
     Type: String
-    Default: 192.168.0.0/24
+    Default: 172.32.16.0/24
 
   Subnet2Block:
     Type: String
-    Default: 192.168.1.0/24
+    Default: 172.32.17.0/24
 
 Resources:
   XRayDemoEksVPC:
@@ -106,6 +102,3 @@ Outputs:
     Value: !Join
       - ","
       - [!Ref Subnet1, !Ref Subnet2]
-
-  RouteTable:
-    Value: !Ref SubnetRouteTable
