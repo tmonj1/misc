@@ -241,8 +241,14 @@ $ eksctl create iamserviceaccount --name xrayd \
   --namespace amazon-cloudwatch \
   --cluster x-ray-demo-cluster \
   --attach-policy-arn arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess \
+  --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy \
   --approve \
   --override-existing-serviceaccounts
+#確認(3つそれぞれにIAMロールのarnが設定されている)
+$ kubectl -n amazon-cloudwatch get sa -o yaml |grep arn
+eks.amazonaws.com/role-arn: arn:aws:iam::372853230800:role/eksctl-x-ray-demo-cluster-addon-iamserviceac-Role1-1DPB5C4W53UGR
+eks.amazonaws.com/role-arn: arn:aws:iam::372853230800:role/eksctl-x-ray-demo-cluster-addon-iamserviceac-Role1-4W8YSL3IH1ZU
+eks.amazonaws.com/role-arn: arn:aws:iam::372853230800:role/eksctl-x-ray-demo-cluster-addon-iamserviceac-Role1-8ZGBUT4FG4F9
 ```
 
 ### 4.4 CloudWatch, FluentD, X-Rayのデーモンを実行
@@ -275,8 +281,7 @@ ok
 #ECRリポジトリの削除
 $ aws cloudformation delete-stack --stack-name x-ray-demo-ecr-repos
 #デプロイの削除
-$ kubectl delete deploy app1
-$ kubectl delete deploy app2
+$ envsubst < x-ray-demo-apps-deploy.template.yaml | kubectl delete -f -
 #デーモンセットの削除
 $ kubectl delete -f cloudwatch-fluentd-xray.yaml
 #IAMサービスアカウントの削除
@@ -332,4 +337,16 @@ source:
     --override-existing-serviceaccounts \
     --approve
 
+---
+トラブルシューティング
+
+* App2コンテナから手動でCloudWatchにメトリックスデータを投げる
+
+```
+# App2コンテナに入って調査
+$ apt-get update
+$ apt-get install python python-pip
+$ pip install awscli
+$ aws cloudwatch put-metric-data --namespace amazon-cloudwatch --metric-name MyMetric --dimensions MyDimention=abc123 --value 99.99 --unit Percent --region ap-northeast-1
+```
     

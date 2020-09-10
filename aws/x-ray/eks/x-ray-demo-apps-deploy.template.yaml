@@ -71,7 +71,7 @@ spec:
             - containerPort: 5000
           env:
             - name: AWS_XRAY_DAEMON_ADDRESS
-              value: xray-service.amazon-cloudwatch
+              value: xray-service.amazon-cloudwatch:2000
           readinessProbe:
             httpGet:
               port: 5000

@@ -42,14 +42,16 @@ namespace app2.Controllers
         [HttpGet("/call1")]
         public async Task<JsonResult> call1Async()
         {
-            // ローカル実行のときはこっち
+            // X-Ray daemon のときはこっち
             // http://app1:80/ を呼び出す
-            // var client = _httpClientFactory.CreateClient("xray");
+            var client = _httpClientFactory.CreateClient("xray");
             // var result = await client.GetStringAsync("http://app1/");
-
-            // EKS のときはこっち
-            var client = new HttpClient();
             var result = await client.GetStringAsync("http://app1-svc:2080/");
+
+            // App Mesh のときはこっち
+            // var client = new HttpClient();
+            // var result = await client.GetStringAsync("http://app1/");
+            // var result = await client.GetStringAsync("http://app1-svc:2080/");
 
             return Json(new
             {

@@ -3,7 +3,7 @@ version: "3.4"
 services:
   app1:
     container_name: app1
-    image: app1:0.1
+    image: app1:0.2
     build:
       context: app1/
       dockerfile: Dockerfile
@@ -20,7 +20,7 @@ services:
 
   app2:
     container_name: app2
-    image: app2:0.1
+    image: app2:0.2
     build:
       context: app2/
       dockerfile: Dockerfile
