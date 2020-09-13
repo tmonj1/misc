@@ -352,6 +352,11 @@ App Mesh構築
 
 Base resource構築済み、ECRイメージ登録済みの状態から
 
+```
+#必要かも
+$ export AWS_DEFAULT_REGION=ap-northeast-1
+```
+
 ```bash
 #クラスタ構築 (AddonPolicies設定)
 eksctl create cluster -f app-mesh-x-ray-cluster-eksctl.yaml
@@ -417,6 +422,8 @@ $ eksctl create iamserviceaccount \
     --cluster $CLUSTER_NAME \
     --namespace x-ray-demo-ns \
     --name app1-svc \
+    --attach-policy-arn arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess \
+    --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy \
     --attach-policy-arn  arn:aws:iam::372853230800:policy/app-policy \
     --override-existing-serviceaccounts \
     --approve
@@ -425,7 +432,7 @@ $ eksctl create iamserviceaccount \
 参考: [チュートリアル 設定 App Mesh Kubernetesとの統合](https://docs.aws.amazon.com/ja_jp/eks/latest/userguide/mesh-k8s-integration.html#configure-app-mesh)
 
 ```bash
-kubectl delete -f x-ray-demo-apps-svc.yaml
+kubectl delete -f app-mesh-x-ray-demo-apps-svc.yaml
 envsubst < app-mesh-x-ray-demo-apps-deploy.template.yaml | kubectl delete -f -
 kubectl delete -f app-mesh.yaml
 kubectl delete -f app-mesh-virtual-node.yaml
