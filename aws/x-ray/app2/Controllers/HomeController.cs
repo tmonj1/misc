@@ -48,7 +48,7 @@ namespace app2.Controllers
             // var result = await client.GetStringAsync("http://app1/");
             var result = await client.GetStringAsync("http://app1-svc:2080/");
 
-            // App Mesh のときはこっち
+            // X-Ray なしのときはこっち
             // var client = new HttpClient();
             // var result = await client.GetStringAsync("http://app1/");
             // var result = await client.GetStringAsync("http://app1-svc:2080/");

@@ -22,7 +22,7 @@ namespace app2
         {
             Configuration = configuration;
 
-            // (App Mesh時はコメントアウト) XRayRecorderの初期化
+            // XRayRecorderの初期化
             AWSXRayRecorder.InitializeInstance(configuration);
 
             // (App Mesh時はコメントアウト) SDKリクエストをすべてトレース対象とする

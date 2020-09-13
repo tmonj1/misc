@@ -31,5 +31,3 @@ spec:
   serviceDiscovery:
     dns:
       hostname: app2-svc.x-ray-demo-ns.svc.cluster.local
----
-

@@ -1,3 +1,13 @@
+## 前提
+
+以下がインストールされていること
+
+* Git bash (Windowsのみ)
+* aws cli
+* eksctl
+* (optional) jq
+* (optional) envsubst
+
 ## 0. Docker イメージ作成
 
 ```bash
@@ -15,7 +25,8 @@ ECR レジストリに App1 と App2 のイメージを登録。
 
 ```bash
 # 準備
-$ export AWS_ACCOUNT_ID=372853230800
+$ export AWS_REGION=ap-northeast-1
+$ export AWS_ACCOUNT_ID=&lt;aws account id>
 $ export AWS_ECR_URL=${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
 # ECRリポジトリの作成
 $ aws cloudformation create-stack --stack-name x-ray-demo-ecr-repos --template-body file://x-ray-demo-ecr-cfn.yaml
@@ -116,9 +127,6 @@ $ kubectl get nodes
 NAME                                               STATUS   ROLES    AGE     VERSION
 ip-192-168-0-180.ap-northeast-1.compute.internal   Ready    <none>   9m43s   v1.17.9-eks-4c6976
 ```
-
-* eksctl は内部的には CloudFormation を使ってクラスターを構築している。このため、CloudFormation のコンソール画面から構築状況が確認できる。
-* eksctl でクラスターを作ると、作成したクラスターがカレントコンテキストになるようにkubeconfigも更新される。
 
 ## 3.2 作成したクラスターの構成確認
 
@@ -280,14 +288,20 @@ ok
 ```bash
 #ECRリポジトリの削除
 $ aws cloudformation delete-stack --stack-name x-ray-demo-ecr-repos
+#サービスの削除
+$ kubectl delete -f x-ray-demo-apps-svc.yaml
 #デプロイの削除
 $ envsubst < x-ray-demo-apps-deploy.template.yaml | kubectl delete -f -
 #デーモンセットの削除
 $ kubectl delete -f cloudwatch-fluentd-xray.yaml
 #IAMサービスアカウントの削除
-$ eksctl delete iamserviceaccount --cluster x-ray-demo-cluster cloudwatch-agent
-$ eksctl delete iamserviceaccount --cluster x-ray-demo-cluster fluentd
-$ eksctl delete iamserviceaccount --cluster x-ray-demo-cluster xrayd
+$ kubectl apply -f x-ray-base.yaml
+#$ eksctl delete iamserviceaccount --cluster x-ray-demo-cluster cloudwatch-agent
+#$ eksctl delete iamserviceaccount --cluster x-ray-demo-cluster fluentd
+#$ eksctl delete iamserviceaccount --cluster x-ray-demo-cluster xrayd
+#OIDCプロバイダーとIAMロールの削除
+$ OIDCURL=$(aws eks describe-cluster --name x-ray-demo-cluster --output json | jq -r .cluster.identity.oidc.issuer | sed -e "s*https://**")
+$ aws iam delete-open-id-connect-provider --open-id-connect-provider-arn arn:aws:iam::${AWS_ACCOUNT_ID}:oidc-provider/${OIDCURL}
 #EKSクラスターの削除
 $ eksctl delete cluster -f x-ray-cluster-eksctl.yaml
 #AWSベースリソースの削除
@@ -319,23 +333,6 @@ source:
   * helm upgrade のところで `--set tracing.enable=true` と `--set tracing.provider=x-ray` を追加
     * 出典: [eks-charts の GitHub のREADME.md](https://github.com/aws/eks-charts/tree/master/stable/appmesh-controller)
   ---
-  #下記はうまく行かなかった (`helm upgrade` で `--set tracing.provider=x-ray` を追加)
-  helm upgrade -i appmesh-controller eks/appmesh-controller     --namespace appmesh-system     --set region=$AWS_REGION     --set serviceAccount.create=false     --set serviceAccount.name=appmesh-controller --set tracing.enabled=true --set tracing.provider=x-ray
-  #下記もダメ
-  helm upgrade -i appmesh-inject eks/appmesh-inject \
---namespace appmesh-system \
---set mesh.name=my-mesh \
---set mesh.create=false \
---set tracing.enabled=true \
---set tracing.provider=x-ray
-  ---
-  eksctl create iamserviceaccount \
-    --cluster $CLUSTER_NAME \
-    --namespace x-ray-demo-ns \
-    --name my-service-a \
-    --attach-policy-arn  arn:aws:iam::372853230800:policy/x-ray-demo-policy \
-    --override-existing-serviceaccounts \
-    --approve
 
 ---
 トラブルシューティング
@@ -349,4 +346,117 @@ $ apt-get install python python-pip
 $ pip install awscli
 $ aws cloudwatch put-metric-data --namespace amazon-cloudwatch --metric-name MyMetric --dimensions MyDimention=abc123 --value 99.99 --unit Percent --region ap-northeast-1
 ```
-    
+
+---
+App Mesh構築
+
+Base resource構築済み、ECRイメージ登録済みの状態から
+
+```bash
+#クラスタ構築 (AddonPolicies設定)
+eksctl create cluster -f app-mesh-x-ray-cluster-eksctl.yaml
+#Namespaceの作成
+$ kubectl apply -f app-mesh-x-ray-demo-ns.yaml
+#作成したNamespaceにコンテキストを設定
+#kubectl config set-context x-ray-demo --cluster <CLUSTER> --user <AUTHINFO> --namespace x-ray-demo-ns
+$ kubectl config set-context x-ray-demo --cluster x-ray-demo-cluster.ap-northeast-1.eksctl.io \
+ --user monji@x-ray-demo-cluster.ap-northeast-1.eksctl.io --namespace x-ray-demo-ns
+#カレントコンテキストを変更
+$ kubectl config use-context x-ray-demo
+#アプリケーションをデプロイ
+$ envsubst < app-mesh-x-ray-demo-apps-deploy.template.yaml | kubectl apply -f -
+#サービスをデプロイ
+$ kubectl apply -f x-ray-demo-apps-svc.yaml
+``` 
+
+```bash
+$ ./pre_upgrade_check.sh 
+
+# AWS App Mesh Controller For K8sを導入
+$ helm repo add eks https://aws.github.io/eks-charts
+$ kubectl apply -k "https://github.com/aws/eks-charts/stable/appmesh-controller/crds?ref=master"
+$ kubectl create ns appmesh-system
+$ export CLUSTER_NAME=x-ray-demo-cluster
+$ eksctl utils associate-iam-oidc-provider \
+    --region=$AWS_REGION \
+    --cluster $CLUSTER_NAME \
+    --approve
+$ eksctl create iamserviceaccount \
+    --cluster $CLUSTER_NAME \
+    --namespace appmesh-system \
+    --name appmesh-controller \
+    --attach-policy-arn arn:aws:iam::aws:policy/AWSCloudMapFullAccess,arn:aws:iam::aws:policy/AWSAppMeshFullAccess \
+    --override-existing-serviceaccounts \
+    --approve
+# automatically add the X-Ray container to new pods and configure the Envoy proxy containers to send data to them
+$ helm upgrade -i appmesh-controller eks/appmesh-controller \
+    --namespace appmesh-system \
+    --set region=$AWS_REGION \
+    --set serviceAccount.create=false \
+    --set serviceAccount.name=appmesh-controller \
+    --set tracing.enabled=true \
+    --set tracing.provider=x-ray
+kubectl apply -f app-mesh-x-ray-demo-ns.yaml
+kubectl apply -f app-mesh.yaml
+kubectl apply -f app-mesh-virtual-node.yaml
+kubectl apply -f app-mesh-virtual-router.yaml
+kubectl apply -f app-mesh-virtual-service.yaml
+
+#Podをリスタート
+$ kubectl -n x-ray-demo-ns rollout restart deploy app1
+$ kubectl -n x-ray-demo-ns rollout restart deploy app2
+
+#確認 (kubectl describe pod で ContainersにEnvoyとxrayがいればOK)
+$ POD=$(kubectl -n x-ray-demo-ns get pods -o jsonpath='{.items[0].metadata.name}')
+$ kubectl -n x-ray-demo-ns get pods ${POD} -o jsonpath='{.spec.containers[*].name}'; echo
+app1 envoy xray-daemon
+
+#Proxy認証の有効化??? (https://docs.aws.amazon.com/app-mesh/latest/userguide/mesh-k8s-integration.html)
+$ aws iam create-policy --policy-name app-policy --policy-document file://app-mesh-proxy-auth.json
+$ eksctl create iamserviceaccount \
+    --cluster $CLUSTER_NAME \
+    --namespace x-ray-demo-ns \
+    --name app1-svc \
+    --attach-policy-arn  arn:aws:iam::372853230800:policy/app-policy \
+    --override-existing-serviceaccounts \
+    --approve
+```
+
+参考: [チュートリアル 設定 App Mesh Kubernetesとの統合](https://docs.aws.amazon.com/ja_jp/eks/latest/userguide/mesh-k8s-integration.html#configure-app-mesh)
+
+```bash
+kubectl delete -f x-ray-demo-apps-svc.yaml
+envsubst < app-mesh-x-ray-demo-apps-deploy.template.yaml | kubectl delete -f -
+kubectl delete -f app-mesh.yaml
+kubectl delete -f app-mesh-virtual-node.yaml
+kubectl delete -f app-mesh-virtual-router.yaml
+kubectl delete -f app-mesh-virtual-service.yaml
+kubectl delete -f app-mesh-x-ray-demo-ns.yaml
+kubectl delete mesh my-mesh
+helm uninstall appmesh-controller --namespace appmesh-system
+#以下は
+OIDCURL=$(aws eks describe-cluster --name $CLUSTER_NAME --output json | jq -r .cluster.identity.oidc.issuer | sed -e "s*https://**")
+aws iam delete-open-id-connect-provider --open-id-connect-provider-arn arn:aws:iam::$ACCOUNT_ID:oidc-provider/$OIDCURL
+eksctl delete cluster -f app-mesh-x-ray-cluster-eksctl.yaml
+```
+
+---
+EKSでは1つのノード上で実行できるPodの数は限りがある
+* [AWS EKS and Pod sizing per Node considerations](https://medium.com/faun/aws-eks-and-pods-sizing-per-node-considerations-964b08dcfad3)
+* [Elastic network interfaces](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html#AvailableIpPerENI)
+
+---
+* [aws/aws-app-mesh-examples](https://github.com/aws/aws-app-mesh-examples/blob/master/walkthroughs/eks/o11y-xray.md)
+  * nodegroupにX-Rayへのwrite accessを追加している
+
+---
+調査！！！
+
+* OIDC周り
+  * [IAM roles for service accounts technical overview](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts-technical-overview.html#pod-configuration)
+    * UID=1337?
+    * [AppMesh Envoy Sidecar initialisation issues #294](https://github.com/aws/aws-app-mesh-controller-for-k8s/issues/294)
+
+超重要。
+[AWS Black Belt Online Seminar: AWS App Mesh](https://d1.awsstatic.com/webinars/jp/pdf/services/20200721_BlackBelt_AWS_App_Mesh.pdf)
+2020年6月 GA: AWS Mesh Controller for K8s 
