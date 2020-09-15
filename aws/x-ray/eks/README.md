@@ -439,7 +439,6 @@ kubectl delete -f app-mesh-virtual-node.yaml
 kubectl delete -f app-mesh-virtual-router.yaml
 kubectl delete -f app-mesh-virtual-service.yaml
 kubectl delete -f app-mesh-x-ray-demo-ns.yaml
-kubectl delete mesh my-mesh
 helm uninstall appmesh-controller --namespace appmesh-system
 #以下は
 OIDCURL=$(aws eks describe-cluster --name $CLUSTER_NAME --output json | jq -r .cluster.identity.oidc.issuer | sed -e "s*https://**")
@@ -467,3 +466,32 @@ EKSでは1つのノード上で実行できるPodの数は限りがある
 超重要。
 [AWS Black Belt Online Seminar: AWS App Mesh](https://d1.awsstatic.com/webinars/jp/pdf/services/20200721_BlackBelt_AWS_App_Mesh.pdf)
 2020年6月 GA: AWS Mesh Controller for K8s 
+
+---
+App Mesh環境構築手順
+
+#### 1. 環境変数の設定
+
+```bash
+AWS_PROFILE=default
+AWS_DEFAULT_REGION=ap-northeast-1
+AWS_REGION=ap-northeast-1
+AWS_ACCOUNT_ID=<AWS_ACCOUNT_ID>
+AWS_ECR_URL=$AWS_ACCOUNT_ID.dkr.ecr.ap-northeast-1.amazonaws.com
+```
+
+#### 2. 置換文字列の編集
+
+`generate_files.sh`を開き、ファイル先頭付近の`rlist`を編集して必要な置換文字列をすべて設定する。
+
+#### 3. マニフェストファイルの生成
+
+テンプレートファイル (.template.yamlなど) からマニフェストファイルを生成する。
+
+```bash
+#yamlフォルダに生成後のファイルが作成される
+./generate_files.sh -e -o yaml *.template.*
+```
+
+#### 4. 生成されたファイルを実行
+
