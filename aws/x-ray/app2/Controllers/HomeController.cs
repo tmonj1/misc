@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Amazon;
+using Amazon.S3;
 using app2.Models;
 
 namespace app2.Controllers
@@ -53,11 +55,16 @@ namespace app2.Controllers
             // var result = await client.GetStringAsync("http://app1/");
             // var result = await client.GetStringAsync("http://app1-svc:2080/");
 
+            var s3Client = new AmazonS3Client(RegionEndpoint.APNortheast1);
+            var result2 = await s3Client.ListBucketsAsync();
+
+
             return Json(new
             {
                 name = "call1",
                 target = "app1",
-                result = result
+                result = result,
+                result2 = result2.ToString()
             });
         }
 
