@@ -18,8 +18,6 @@ ASP.NET Core のサンプルプログラム (app1とapp2) を Amazon EKS クラ�
 
 * X-RayについてはオンプレまたはEC2インスタンス上で利用する手順についても説明している。詳細はxraydフォルダの[README.md](./xrayd/README.md)を参照
 
-## 1. 構成
-
 **サンプルアプリケーションの構成**
 
 * マイクロサービス2個 (app1とapp2)、AWSサービス1個 (S3) からなる
@@ -67,3 +65,9 @@ X-Ray daemonは各Podに展開する。CloudWatchとFluentDはDaemonSetとして
 * AWS STS
 
 ※ Amazon ECS と Fargate は使用しない
+
+**ツール類のバージョン**
+
+* kubectl v1.17.9 (server/clientどちらも同じ)
+* eksctl 0.27.0
+* helm chart v3.3.1
