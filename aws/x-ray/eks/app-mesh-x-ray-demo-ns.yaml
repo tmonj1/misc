@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: x-ray-demo-ns
-  # enable app mesh controller to inject Envoy onto each pode
-  labels:
-    mesh: my-mesh
-    appmesh.k8s.aws/sidecarInjectorWebhook: enabled
