@@ -58,7 +58,7 @@ show_usage () {
   echo "    The '.env.template' part of the file name is removed at the same time."
   echo ""
   echo "  Example:"
-  echo "    $ $PROGNAME --out yaml app-ns.template.yaml, app-cluster.template.yaml"
+  echo "    $ $PROGNAME --out app app-ns.template.yaml, app-cluster.template.yaml"
   echo "    $ ls ./yaml"
   echo "      ./yaml/app-ns.yaml"
   echo "      ./yaml/app-cluster.yaml"
