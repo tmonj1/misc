@@ -22,7 +22,6 @@ footer: ""
 - [3. AWS上での実行](#3-aws上での実行)
   - [3.1 EC2インスタンス上でアプリケーションと X-Ray デーモンを実行](#31-ec2インスタンス上でアプリケーションと-x-ray-デーモンを実行)
   - [3.2 EC2インスタンス上でDocker-Composeで実行](#32-ec2インスタンス上でdocker-composeで実行)
-  - [3.3 EKS上で実行](#33-eks上で実行)
 
 ## 1. X-Ray デーモンコンテナの作成
 
@@ -89,22 +88,14 @@ $ docker run \
 
 ### 3.2 EC2インスタンス上でDocker-Composeで実行
 
-* **2.2 Docker-Compose でアプリケーションと X-Ray デーモンを実行** と同じ
+* 構成としては**2.2 Docker-Compose でアプリケーションと X-Ray デーモンを実行** と同じ
+* EC2の場合、インスタンスのメタ情報が取得できるようになるため、app2のappSettings.jsonに以下の設定を追加
 
-### 3.3 EKS上で実行
-
-
-構成:
+```json
+"XRay": {
+  "DisableXRayTracing": "false",
+  "UseRuntimeErrors": "true",
+  "AWSXRayPlugins": "EC2Plugin",  // <- この行を追加 
+  "CollectSqlQueries": "false"
+}
 ```
-┏━━━━━━┓┏━━━━━━┓┏━━━━━━┓
-┃ App1 ┃┃ App2 ┃┃ XRay ┃
-┗━━━━━━┛┗━━━━━━┛┗━━━━━━┛
-┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃         Pod          ┃
-┗━━━━━━━━━━━━━━━━━━━━━━┛
-┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃         Node         ┃
-┗━━━━━━━━━━━━━━━━━━━━━━┛
-```
-
-* X-Ray デーモンは各 Pod ごとに起動する。
