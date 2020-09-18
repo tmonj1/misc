@@ -12,7 +12,6 @@
 #app2のタグを打つ
 $ docker tag app1:0.2 ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/myapp-app1:0.2
 #app2をECRにpush
-$ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/myapp-app1:0.2
 ```
 
 #### 1. 環境変数の設定
@@ -49,6 +48,8 @@ rlist+=('{{SUBNET_1c}} => subnet-068a2568991910099')  #サブネット1cのID
 ```bash
 #appフォルダに生成後のファイルが作成される
 $ ./generate_files.sh -e -o app *.template.*
+#appフォルダにtemplate以外のファイルをコピー
+$ find . -type f -maxdepth 1|grep -v template |xargs -IX cp X app
 ```
 
 #### 4. クラスタ構築
@@ -108,7 +109,7 @@ eksctl create iamserviceaccount \
 :
 [ℹ]  created serviceaccount "appmesh-system/appmesh-controller"
 
-#Meshコントローラをデプロイ (tracingオプションでX-Rayを有効化)
+#Meshコントローラをデプロイ
 $ helm upgrade -i appmesh-controller eks/appmesh-controller \
     --namespace appmesh-system \
     --set region=$AWS_REGION \
