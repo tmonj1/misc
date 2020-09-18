@@ -1,0 +1,13 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "appmesh:StreamAggregatedResources",
+            "Resource": [
+                "arn:aws:appmesh:ap-northeast-1:372853230800:mesh/my-mesh/virtualNode/app1-svc_app-ns",
+                "arn:aws:appmesh:ap-northeast-1:372853230800:mesh/my-mesh/virtualNode/app2-svc_app-ns"
+            ]
+        }
+    ]
+}

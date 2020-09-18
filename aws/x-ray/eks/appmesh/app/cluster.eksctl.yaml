@@ -1,0 +1,32 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: app
+  region: ap-northeast-1
+  version: "1.17"
+
+vpc:
+  subnets:
+    public:
+      # (pls edit)
+      ap-northeast-1a: {id: subnet-058ecd35d42d6516a}
+      ap-northeast-1c: {id: subnet-068a2568991910099}
+
+nodeGroups:
+  - name: app-nodegroup
+    instanceType: t2.medium
+    desiredCapacity: 1
+    minSize: 1
+    maxSize: 2
+    volumeSize: 20
+    iam:
+      withAddonPolicies:
+        albIngress: true
+        autoscaler: true
+        xray: true
+        cloudwatch: true
+        appMesh: true
+        appMeshPreview: true
+#      ssh:
+#        allow: true # will use ~/.ssh/id_rsa.pub as the default ssh key
