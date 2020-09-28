@@ -3,7 +3,6 @@
 
 #### 0. 前提
 
-* AWS上にEKSクラスターがすでに作成されていること。
 * ECRにイメージ (app1とapp2) がすでに登録されていること。
 
 (参考) app1イメージのECRへの登録
@@ -206,7 +205,7 @@ eks.amazonaws.com/role-arn: arn:aws:iam::<AWS_ACCOUNT_ID>:role/eksctl-app-addon-
 #### 7. アプリケーションのデプロイ
 
 ```bash
-#Proxy認証の有効化 (https://docs.aws.amazon.com/app-mesh/latest/userguide/mesh-k8s-integration.html)
+#Proxy認可の有効化 (https://docs.aws.amazon.com/app-mesh/latest/userguide/proxy-authorization.html)
 $ aws iam create-policy --policy-name app-policy --policy-document file://app-proxy-auth.json
 
 #app1のサービスアカウント生成
@@ -220,7 +219,7 @@ $ eksctl create iamserviceaccount \
     --override-existing-serviceaccounts \
     --approve
 
-#app2のサービスアカウント生成 (%%%X-RayとCWのポリシーはApp Meshでは不要かもしれない)
+#app2のサービスアカウント生成 (X-RayとCWのポリシーはApp Meshでは不要なはずだが試してないのでこのままにしておく)
 $ eksctl create iamserviceaccount \
     --cluster $AWS_CLUSTER_NAME \
     --namespace app-ns \
@@ -228,7 +227,7 @@ $ eksctl create iamserviceaccount \
     --attach-policy-arn arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess \
     --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy \
     --attach-policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess \
-    --attach-policy-arn  arn:aws:iam::${AWS_ACCOUNT_ID}:policy/app-policy \
+    --attach-policy-arn arn:aws:iam::${AWS_ACCOUNT_ID}:policy/app-policy \
     --override-existing-serviceaccounts \
     --approve
 
@@ -300,16 +299,16 @@ virtualrouter.appmesh.k8s.aws "app2-svc-virtual-router" deleted
 $ kubectl delete -f app-virtual-node.yaml 
 virtualnode.appmesh.k8s.aws "app1-svc" deleted
 virtualnode.appmesh.k8s.aws "app2-svc" deleted
+
+#Meshの削除
+$ kubectl delete -f app-mesh.yaml
 ```
 
 (2) アプリケーションリソースの削除
 
 ```bash
-#Meshの削除(%%%)
-$ kubectl delete -f app-mesh.yaml
-
 #Serviceの削除
-$ ikubectl delete -f app-svc.yaml 
+$ kubectl delete -f app-svc.yaml 
 service "app1-svc" deleted
 service "app2-svc" deleted
 
@@ -320,21 +319,22 @@ deployment.apps "app2" deleted
 
 #アプリケーションのサービスアカウントの削除
 kubectl delete sa app1-svc
-kubectl delete sa app1-svc
+kubectl delete sa app2-svc
 
-#カスタムポリシーの削除 (%%%)
-$ aws iam create-policy --policy-name app-policy --policy-document file://app-proxy-auth.json
+#IAMロールの削除
+* app1-svcなどのサービスアカウントに紐付いたロールを削除する
+* AWS CLIでも削除できるが、ロールからすべてのポリシーを一つずつdetachした後、ロールそのものを削除する手順になる
+* CLIだとかなり複雑になるため、AWSコンソールから削除したほうが早い
+
+#カスタムポリシーの削除
+* カスタムポリシー`app-policy`をAWSコンソールから削除
 
 #Daemonのサービスアカウントの削除
-$ kubectl -n amazon-cloudwatch get sa xrayd -o json |jq .metadata.annotations'["eks.amazonaws.com/role-arn"]'
-$ aws iam delete-role --role-arn "arn:aws:iam::<aws_account_id>:role/eksctl-app-addon-iamserviceaccount-amazon-cl-Role1-7192GPNYS26C"
-"arn:aws:iam::<aws_account_id>:role/eksctl-app-addon-iamserviceaccount-amazon-cl-Role1-7192GPNYS26C"
-kubectl delete sa xrayd 
+kubectl delete sa -n amazon-cloudwatch xrayd 
+kubectl delete sa -n amaon-coudwatch cloudwatch-agent
+kubectl delete sa -n amaon-coudwatch fluentd
 
-kubectl delete sa cloudwatch-agent
-kubectl delete sa fluentd
-
-#サービスアカウントに対応するIAMロールの削除 (%%%)
+#サービスアカウントに対応するIAMロールの削除 (AWSコンソールから手作業で削除。CLIからも削除できるが削除対象のIAMロールのIDを調べるのが大変なので。)
 
 #OIDCプロバイダーの削除
 $ OIDCURL=$(aws eks describe-cluster --name app --output json | jq -r .cluster.identity.oidc.issuer | sed -e "s*https://**")
@@ -352,13 +352,11 @@ eksctl delete iamserviceaccount --cluster $AWS_CLUSTER_NAME \
     --namespace appmesh-system \
     --name appmesh-controller
 
-#対応するロールの削除 (%%%)
-
-#Meshコントローラを削除 (%%%)
-$ helm delete -i appmesh-controller eks/appmesh-controller 
+#Meshコントローラを削除
+$ helm delete appmesh-controller eks/appmesh-controller 
 
 #appmesh-system名前空間の削除
-$ kubectl create ns appmesh-system
+$ kubectl delete ns appmesh-system
 ```
 
 (4) MeshのCRDの削除
