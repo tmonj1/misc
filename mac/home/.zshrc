@@ -97,7 +97,8 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # コマンドプロンプト
-PROMPT="%{${fg[black]}%}[%~]%{${reset_color}%}"
+#PROMPT="%{${fg[black]}%}[%~]%{${reset_color}%}"
+PROMPT="[%~]"
  
 autoload -Uz vcs_info
 setopt prompt_subst
