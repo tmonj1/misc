@@ -96,3 +96,11 @@ public async Task Invoke(HttpContext context)
 }
 ```
 
+### (3) 
+
+![image](https://user-images.githubusercontent.com/459311/97109498-e42ff680-1716-11eb-9daf-66b8f2800097.png)
+
+* アナロジーとしては、ClaimsPrincipalが人、ClaimsIdentityはパスポートや免許証などを表す。認証の世界でIdentityが複数になるのはMFAなどの場合。
+* ClaimsIdentity.AuthenticationTypeには"Bearer"、"Cookie"などの値が入る。
+* ClaimsIdentity.IsAuthenticatedがfalseになるのはゲストユーザの場合。
+* Roleも互換性のために残されているが使うべきではない
