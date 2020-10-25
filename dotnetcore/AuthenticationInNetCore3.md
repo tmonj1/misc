@@ -85,7 +85,7 @@ public async Task Invoke(HttpContext context)
     // コードは面倒なので省略
 
     // (2) AuthenticateAsyncメソッドの呼び出し
-    //   * リクエストで送られてきた認証情報を検証し、ClaimsPrincipalを作成してcontext.Userに設定する
+    //   * リクエストで送られてきた認証情報を検証し、ClaimsPrincipalを作成してcontext.Userに設定する
     var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
     if (result?.Principal != null)
     {
@@ -96,7 +96,7 @@ public async Task Invoke(HttpContext context)
 }
 ```
 
-### (3) 
+### (3) PrincipleとIdentity
 
 ![image](https://user-images.githubusercontent.com/459311/97109498-e42ff680-1716-11eb-9daf-66b8f2800097.png)
 
