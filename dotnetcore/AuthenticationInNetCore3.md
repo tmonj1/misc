@@ -19,7 +19,7 @@ ASP.NET Core 3 の認証・認可の設計と実装について調べたこと�
 
 以降の記述は、これらの資料とソースコードを参照し、その内容をあとからいつでも全体像を思い出せるように要点だけまとめたものである。
 
-## 2. 全体サマリ
+## 2. コードの流れ
 
 ### (1) 認証サービスの登録
 
@@ -101,7 +101,11 @@ AuthenticationMiddlewareから下流のコードは以下:
 * [CookieAuthenticationHandler](https://bit.ly/34phPkz)
 * [OpenIdConnectHandler](https://bit.ly/3mmaloq)
 
-### (3) PrincipleとIdentity
+## 2. クラス構成
+
+### (1) PrincipleとIdentity
+
+ASP.NET Coreでは、`HttpContext.User`がカレントユーザを表す。未認証の状態では、`User`はgenericなユーザでClaimが一つもない。
 
 ![image](https://user-images.githubusercontent.com/459311/97109498-e42ff680-1716-11eb-9daf-66b8f2800097.png)
 
