@@ -96,6 +96,11 @@ public async Task Invoke(HttpContext context)
 }
 ```
 
+AuthenticationMiddlewareから下流のコードは以下:
+
+* [CookieAuthenticationHandler](https://bit.ly/34phPkz)
+* [OpenIdConnectHandler](https://bit.ly/3mmaloq)
+
 ### (3) PrincipleとIdentity
 
 ![image](https://user-images.githubusercontent.com/459311/97109498-e42ff680-1716-11eb-9daf-66b8f2800097.png)
