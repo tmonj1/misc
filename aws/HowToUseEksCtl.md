@@ -28,7 +28,7 @@ $ eksctl create cluser --help
 
 ```bash
 #Show kubeconfig
-$ kubectl view config
+$ kubectl config view
 apiVersion: v1
 clusters:
 - cluster:
