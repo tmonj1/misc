@@ -138,7 +138,7 @@ DO NOT USE `Wait` method, becauase `Wait` method not only cancels the merit of a
 but also can cause a dead lock in UI context. 
 
 `Wait` can cause a dead lock in ASP.NET as well, but NOT in ASP.NET Core, because synchronization context
-(request context) was removed in ASP.NET Core and now is context free.
+(request context) has been removed from ASP.NET Core and now is context free.
 
 ### 2.3 ValueTask
 
