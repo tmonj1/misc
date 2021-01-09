@@ -4,12 +4,12 @@ This is a short list of reminders on thead and task in C#.
 
 ## 1. Task
 
-A task represetnts *an asynchronous operations.
+A task represents an asynchronous operation.
 
 ### 1.1 A task is not necessarily executed on a different thread
 
 A task usually represents an synchronous operation, but not limited to it. 
-It is possible to create and run a synchronous task as shown below:
+It is possible to create and run a **synchronous** task as shown below:
 
 ```C#
 static void Main(string[] args)
@@ -17,7 +17,7 @@ static void Main(string[] args)
     // create a task
     var task = new Task(() => {Console.WriteLine("hello, world");});
     // run it synchronously
-    task.RunSynchronously()
+    task.RunSynchronously();
 }
 ```
 
@@ -61,7 +61,7 @@ static async Task Main(string[] args)
 }
 ```
 
-In the above example, while the task is being executing, the main thread is alive because Main
+In the above example, while the task is being executed, the main thread is alive because Main
 `await`s the completion of the task.
 
 ## 2. Async and Await
