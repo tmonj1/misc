@@ -37,7 +37,47 @@ Create a new file named *xunit.runner.json* and put a following JSON content int
 
 ## $$$ VSCode integration
 
-## $$$ coverage
+## coverage
+
+You can collect test coverage using `dotnet test` command, then visualize it using `ReportGenerator`. It would be convienient when you use `ReportGenerator` if you install `dotnet-config`.
+
+```Bash
+#install ReportGenerator
+$ dotnet add package ReportGenerator
+
+#install dotnet-config
+$ dotnet tool install --global dotnet-config --version 1.0.0-rc.2
+
+#collect coverage (in covertura format)
+$ dotnet test --collect:"XPlat Code Coverage"
+
+#prepare .netconfig file
+$ vi .netconfig
+$ cat .netconfig
+[ReportGenerator]
+  reports=TestResults/coverage.cobertura.xml
+  reporttype = HtmlChart
+  reporttype = Html
+  reporttype = Badges
+  reporttype = PngChart
+  targetdir = coverage/report
+  historydir = coverage/history
+  classfilters = -HowToUseXUnit.Program
+  title = Unit Test 2 
+  verbosity = Verbose
+
+#visualize coverage info
+$ dotnet ~/.nuget/packages/reportgenerator/4.8.4/tools/net5.0/ReportGenerator.dll
+
+#show coverage in brawser
+$ open coverage/report/index.html
+```
+
+**resources**
+
+* [Microsoft - Use code coverage for unit testing](https://docs.microsoft.com/ja-jp/dotnet/core/testing/unit-testing-code-coverage?tabs=linux)
+* [GitHub - ReportGenerator](https://github.com/danielpalme/ReportGenerator)
+* [GitHub - dotnet-config](https://github.com/dotnetconfig/dotnet-config)
 
 ## $$$ Parallelism
 
