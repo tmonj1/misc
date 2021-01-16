@@ -35,7 +35,12 @@ Create a new file named *xunit.runner.json* and put a following JSON content int
   * watch  
   * guidelines (directory structure, filename, namespace, coding conventions)
 
-## $$$ VSCode integration
+## VSCode integration
+
+* You can run tests by clicking "Run All Tests", "Run Test" commands and so on, shown on top of each class/method in test code files.
+* **dotnet core test explorer** show the list of all tests for you, but actually I couldn't show the list for unknown reason.
+    * It has something to do with dotnet cli tool language settings, but after I changed language to English I still have the same issue.
+    * [.NET Core Test Explorer](https://marketplace.visualstudio.com/items?itemName=formulahendry.dotnet-test-explorer)
 
 ## coverage
 
@@ -89,4 +94,3 @@ $ open coverage/report/index.html
   * If the above doesn't work, nUnit format is available, too
     * [[.NET Core] VS Code を使った xUnit ユニットテストの導入](https://mseeeen.msen.jp/dotnet-core-xunit-test-project/)
 
-## $$$ 
