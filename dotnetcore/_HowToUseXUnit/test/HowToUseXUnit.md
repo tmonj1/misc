@@ -54,13 +54,13 @@ $ dotnet add package ReportGenerator
 $ dotnet tool install --global dotnet-config --version 1.0.0-rc.2
 
 #collect coverage (in covertura format)
-$ dotnet test --collect:"XPlat Code Coverage"
+$ dotnet test --collect:"XPlat Code Coverage" -r testresults
 
 #prepare .netconfig file
 $ vi .netconfig
 $ cat .netconfig
 [ReportGenerator]
-  reports=TestResults/coverage.cobertura.xml
+  reports=testresults/**/coverage.cobertura.xml
   reporttype = HtmlChart
   reporttype = Html
   reporttype = Badges
