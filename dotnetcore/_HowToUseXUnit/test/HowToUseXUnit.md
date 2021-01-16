@@ -78,6 +78,8 @@ $ dotnet ~/.nuget/packages/reportgenerator/4.8.4/tools/net5.0/ReportGenerator.dl
 $ open coverage/report/index.html
 ```
 
+* You can use `[ExcludeFromCodeCoverage]` attribute for classes or methods to exclude them from coverage instead of `classfilters`.
+
 **resources**
 
 * [Microsoft - Use code coverage for unit testing](https://docs.microsoft.com/ja-jp/dotnet/core/testing/unit-testing-code-coverage?tabs=linux)
