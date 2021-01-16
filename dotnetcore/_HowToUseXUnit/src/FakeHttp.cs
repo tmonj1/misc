@@ -42,5 +42,10 @@ namespace HowToUseXUnit
         {
             return await _httpClient.GetStringAsync(url);
         }
+
+        public int xxx()
+        {
+            return 3;
+        }
     }
 }

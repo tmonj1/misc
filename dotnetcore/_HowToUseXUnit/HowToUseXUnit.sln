@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HowToUseAsync", "src\HowToUseAsync.csproj", "{BAEF3420-678D-4566-80A4-5EB9D9928003}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XUnitTestDemo", "test\XUnitTestDemo.csproj", "{57AE5E82-F0AA-4A72-8017-5657D34CD6B1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XUnitTestDemoTest", "test\XUnitTestDemoTest.csproj", "{57AE5E82-F0AA-4A72-8017-5657D34CD6B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
