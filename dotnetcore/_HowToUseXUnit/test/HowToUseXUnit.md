@@ -54,7 +54,7 @@ $ dotnet add package ReportGenerator
 $ dotnet tool install --global dotnet-config --version 1.0.0-rc.2
 
 #collect coverage (in covertura format)
-$ dotnet test --collect:"XPlat Code Coverage" -r testresults
+$ dotnet test --collect:"XPlat Code Coverage" -r testresults [--logger:html]
 
 #prepare .netconfig file
 $ vi .netconfig
