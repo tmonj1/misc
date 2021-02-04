@@ -6,6 +6,6 @@
   reporttype = PngChart
   targetdir = coverage/report
   historydir = coverage/history
-  classfilters0 = -HowToUseXUnit.Program
+  classfilters = -HowToUseXUnit.Program
   title = Unit Test 2 
   verbosity = Verbose
