@@ -1,1 +1,2 @@
-Miscellaneous programming tips, code fragments, and technical memos
+Miscellaneous programming tips, code fragments, and technical memos.
+
