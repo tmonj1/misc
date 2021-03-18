@@ -2,7 +2,7 @@
 
 ## 1. イメージのビルドと実行
 
-### (1) Dockerを使う場合
+### (1) Dockerを使う場合 (httpのみ)
 
 ```bash
 #ビルド
@@ -15,7 +15,7 @@ $ docker run -p 5000:80 --name demo1 -d --rm demo1:0.1
 $ docker stop demo1
 ```
 
-### (2) Docker Composeを使う場合
+### (2) Docker Composeを使う場合 (http/https両方に対応)
 
 ```bash
 #ビルドと実行
@@ -27,7 +27,7 @@ $ docker-comose down
 
 ### (3) 実行確認
 
-ブラウザで以下のURLのいずれかを実行し、正しく画面が表示されることを確認する。
+ブラウザで以下のURLのいずれかを実行し、正しく画面が表示されることを確認する。Docker Composeを使った場合、`https://localhost:5001`も使用可能。
 
 |URL|表示内容|
 |:--|:--|
