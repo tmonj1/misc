@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: demo1
+  name: demo1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: demo1
+    spec:
+      containers:
+      - image: demo1:0.1
+        name: demo1
+        resources: {}
+        env:
+          - name: ENV_AT_RUNTIME_FROM_CM
+            valueFrom:
+              configMapKeyRef: 
+                name: demo1-cm
+                key: ENV_AT_RUNTIME
+status: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: demo1-cm
+data:
+  ENV_AT_RUNTIME: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: demo1-clusterip
+  name: demo1-clusterip
+spec:
+  ports:
+  - name: "5000"
+    port: 5000
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: demo1
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: demo1
+  name: demo1-nodeport
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: demo1
+  type: NodePort
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: demo1
+  name: demo1-headless
+spec:
+  clusterIP: None
+  ports:
+  - port: 5002
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: demo1
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: demo1
+  name: demo1-externalname
+spec:
+  externalName: www.google.com
+  selector:
+    app: demo1-externalname
+  type: ExternalName
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: demo1
+  name: demo1-lb
+spec:
+  ports:
+  - name: "5030"
+    port: 5030
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: demo1
+  type: LoadBalancer
+status:
+  loadBalancer: {}
+
