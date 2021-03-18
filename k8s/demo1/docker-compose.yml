@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  demo1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      ENV_AT_RUNTIME: "yes"
+    ports:
+      - 5000:80
