@@ -1,5 +1,7 @@
 # サンプルプログラム: demo1
 
+* 以下は Docker for Mac の desktop-desktop クラスターでの実行例。
+
 ## 1. Dockerを使う場合
 
 ### (1) Dockerを使う場合 (httpのみ)
@@ -73,6 +75,9 @@ demo1-lb             LoadBalancer   10.101.126.253  localhost        5030:31844/
 #NodePortの実行確認
 $ curl http://kubernetes.docker.internal:32072
 Hello World!
+#localhostもOK
+$ curl http://localhost:32972
+Hello World!
 
 #ClusterIPの実行確認
 $ kbb -i -- wget -O- http://demo1-clusterip:5000/
@@ -121,6 +126,8 @@ Hello World!
 
 ### (3) クラスター構成
 
+
+
 ## 3. イメージのDockerレジストリへの登録
 
 ### (1) Docker Hubへの登録
@@ -143,3 +150,11 @@ $ docker push {アカウント名}/demo1:0.1
 
 * [./push-to-ecr.sh](./push-to-ecr.sh)を参照。
 
+## 4. その他
+
+### (1) Ingress
+
+Docker for Mac 環境では ingress は動作しなかった。
+
+* 単純に`k apply -f ingress.yml` を実行してもダメ。コマンド自体は成功するが、`k get ingress` したとき`ADDRESS`が空 (正しく構成されると`localhost`になるらしい)
+* ingress-nginxの公式ページ(https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac)に従ってingress-nginxをインストールしたが、`k get pods -n ingress-nginx`すると、ingress-nginx-controller自体は上がっているものの、`ingress-nginx-admission-create-xxxx`というPodが2つ、起動に失敗している。ログを見てみると、"Error from server (NotFound): pods ingress-nginx-admission-create-jlclr not found" とのこと。この状態で`k apply -f ingress.yml`を実行するとコマンド自体は成功し、`ADDRESS`も`localhost`に設定されるが、`curl http://localhost`は失敗する。[このページ](https://github.com/MicrosoftDocs/azure-docs/issues/62037)に対策らしきものが書いてあったので手順通りにやってみたがうまくいかなかった。

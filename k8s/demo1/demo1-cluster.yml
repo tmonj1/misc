@@ -18,7 +18,7 @@ spec:
         app: demo1
     spec:
       containers:
-      - image: demo1:0.1
+      - image: demo1:0.1.3
         name: demo1
         resources: {}
         env:
@@ -26,6 +26,11 @@ spec:
             valueFrom:
               configMapKeyRef: 
                 name: demo1-cm
+                key: ENV_AT_RUNTIME
+          - name: ENV_AT_RUNTIME_FROM_SECRET
+            valueFrom:
+              secretKeyRef: 
+                name: demo1-secret
                 key: ENV_AT_RUNTIME
 status: {}
 ---
@@ -36,6 +41,14 @@ metadata:
   name: demo1-cm
 data:
   ENV_AT_RUNTIME: "true"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: demo1-secret
+data:
+  ENV_AT_RUNTIME: c2VjcmV0X29u
 ---
 apiVersion: v1
 kind: Service

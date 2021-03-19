@@ -59,6 +59,14 @@ namespace demo1
                 {
                     await context.Response.WriteAsync(context.Request.QueryString.ToString());
                 });
+                endpoints.MapGet("/h", async context =>
+                {
+                    await context.Response.WriteAsync("ok");
+                });
+                endpoints.MapGet("/version", async context =>
+                {
+                    await context.Response.WriteAsync("v0.1.3");
+                });
             });
         }
     }
