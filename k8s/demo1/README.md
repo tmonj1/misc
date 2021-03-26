@@ -59,13 +59,17 @@ $ docker rmi demo1:0.1 demo2:0.1
 * Docker for Mac がインストール済みで Kubernetes が有効化されていること
 
 ```bash
-#まずsecretを展開しておく(for Docker Hub)
+#まずsecretを展開しておく(for Docker Hub) (PodのimagePullSecretを通じて適用される)
 $ k create secret docker-registry --save-config demo1-secret-docker-registry --docker-username=<Docker Hub ID>  --docker-password <Password> --docker-server=https://index.docker.io/v1/
-#ECR用はこちら
+
+#ECR用はこちら(EKSの場合はAmazonEC2ContainerRegistryReadOnlyポリシーがNodeのインスタンスプロファイルを通じて適用されているので不要(imagePullSecretの記述も不要))
 $ k delete secret --ignore-not-found demo1-secret-ecr
 $ k create secret docker-registry --save-config demo1-secret-ecr --docker-username=AWS \
 --docker-password=`aws ecr get-login-password --region ${AWS_REGION}` \
 --docker-server=https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+
+* 参考: [How to use Docker Image in ECR with AWS EKS](https://stackoverflow.com/questions/54109603/how-to-use-docker-image-in-ecr-with-aws-eks)
+
 #クラスターの展開
 $ k apply -f demo1-cluster.yml
 
