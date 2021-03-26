@@ -14,7 +14,7 @@ $ docker build -t demo:0.1 .
 $ docker run -p 5000:80 --name demo1 -d --rm demo1:0.1
 
 #停止
-$ docker stop demo1
+$ docker stop demo1:0.1 
 ```
 
 ### (2) Docker Composeを使う場合 (http/https両方に対応)
@@ -39,11 +39,28 @@ $ docker-comose down
 
 ## 2. Kubernetesを使う場合
 
+### (0) Dockerイメージの登録
+
+* 本番環境ではk8sクラスタ上でPublicイメージはDocker Hubから、PrivateイメージはPrivateレジストリからpullすることを想定し、まずイメージをDocker HubにPrivateリポジトリとして登録する
+* 予めDocker Hub上にdemo2というprivateリポジトリ作成しておく
+
+```bash
+#Dockerイメージの登録
+$ docker tag demo1:0.1 <Docker Hub ID>/demo2:0.1
+$ docker login -u <Docker Hub ID> -p <password>
+$ docker push <Docker Hub ID>/demo2:0.1
+
+#DockerイメージをローカルPCから削除(ちゃんとDocker Hubから取得してくるか検証するため)
+$ docker rmi demo1:0.1 demo2:0.1
+```
+
 ### (1) クラスタの展開
 
 * Docker for Mac がインストール済みで Kubernetes が有効化されていること
 
 ```bash
+#まずsecretを展開しておく
+$ k create secret docker-registry --save-config demo1-secret-docker-registry --docker-username=<Docker Hub ID>  --docker-password <Password> --docker-server=https://index.docker.io/v1/
 #クラスターの展開
 $ k apply -f demo1-cluster.yml
 
