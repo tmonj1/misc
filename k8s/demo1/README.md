@@ -76,8 +76,11 @@ demo1-lb             LoadBalancer   10.101.126.253  localhost        5030:31844/
 $ curl http://kubernetes.docker.internal:32072
 Hello World!
 #localhostもOK
-$ curl http://localhost:32972
+$ curl http://localhost:32072
 Hello World!
+
+* Docker for Mac `localhost`では接続できないかも(https://github.com/kubernetes-sigs/kind/issues/808)
+* NodePortのPORTSの`80:32072`の80は`ClasterIP`1のとき。localhostにアクセスするときは`32072`を使う
 
 #ClusterIPの実行確認
 $ kbb -i -- wget -O- http://demo1-clusterip:5000/
