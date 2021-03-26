@@ -59,8 +59,13 @@ $ docker rmi demo1:0.1 demo2:0.1
 * Docker for Mac がインストール済みで Kubernetes が有効化されていること
 
 ```bash
-#まずsecretを展開しておく
+#まずsecretを展開しておく(for Docker Hub)
 $ k create secret docker-registry --save-config demo1-secret-docker-registry --docker-username=<Docker Hub ID>  --docker-password <Password> --docker-server=https://index.docker.io/v1/
+#ECR用はこちら
+$ k delete secret --ignore-not-found demo1-secret-ecr
+$ k create secret docker-registry --save-config demo1-secret-ecr --docker-username=AWS \
+--docker-password=`aws ecr get-login-password --region ${AWS_REGION}` \
+--docker-server=https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 #クラスターの展開
 $ k apply -f demo1-cluster.yml
 
