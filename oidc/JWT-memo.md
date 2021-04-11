@@ -181,3 +181,4 @@ JWKは公開鍵をJSON形式で格納するための仕様。JWK Set Documentは
 1. [OAuth & OpenID Connect 関連仕様まとめ](https://qiita.com/TakahikoKawasaki/items/185d34814eb9f7ac7ef3)
 1. [JSON Web Key (JWK)(RFC7517)](https://tools.ietf.org/html/rfc7517)
 1. [OpenID Connect の JWT の署名を自力で検証してみると見えてきた公開鍵暗号の実装の話](https://qiita.com/bobunderson/items/d48f89e2b3e6ad9f9c4c)
+1. [JWT（JSON Web Token）の紹介](https://meetup-jp.toast.com/3511)
