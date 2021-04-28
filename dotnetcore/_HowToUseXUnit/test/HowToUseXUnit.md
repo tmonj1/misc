@@ -54,6 +54,7 @@ $ dotnet add package ReportGenerator
 $ dotnet tool install --global dotnet-config --version 1.0.0-rc.2
 
 #collect coverage (in covertura format)
+# echo "XPlat Code Coverage" | xarges -I {} dotnet test --collect:{} -r testresults [--logger:html]  #Git Bashだとこの形式
 $ dotnet test --collect:"XPlat Code Coverage" -r testresults [--logger:html]
 
 #prepare .netconfig file
