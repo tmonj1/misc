@@ -73,7 +73,9 @@ $ cat .netconfig
   verbosity = Verbose
 
 #visualize coverage info
-$ dotnet ~/.nuget/packages/reportgenerator/4.8.4/tools/net5.0/ReportGenerator.dll
+#$ dotnet ~/.nuget/packages/reportgenerator/4.8.4/tools/net5.0/ReportGenerator.dll
+dotnet tool install --global dotnet-reportgenerator-globaltool
+export PATH=${PATH}:~/.dotnet/tools # needed if Linux or MacOS
 
 #show coverage in brawser
 $ open coverage/report/index.html
