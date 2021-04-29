@@ -75,7 +75,7 @@ $ cat .netconfig
 #visualize coverage info
 #$ dotnet ~/.nuget/packages/reportgenerator/4.8.4/tools/net5.0/ReportGenerator.dll
 dotnet tool install --global dotnet-reportgenerator-globaltool
-export PATH=${PATH}:~/.dotnet/tools # needed if Linux or MacOS
+export PATH=${PATH}:~/.dotnet/tools # needed if Linux or MacOS (see https://stackoverflow.com/questions/62705105/reportgenerator-is-not-recognized-as-an-internal-or-external-command-operable)
 
 #show coverage in brawser
 $ open coverage/report/index.html
