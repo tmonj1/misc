@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  jenkins_master:
+    container_name: jenkins_master
+    build:
+      context: ./jenkins_master
+      dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
+      - '5000:5000'
+    volumes:
+      - type: volume
+        source: jenkins_home
+        target: /var/jenkins_home
+volumes:
+  jenkins_home:
