@@ -83,21 +83,12 @@ $ open coverage/report/index.html
 
 * You can use `[ExcludeFromCodeCoverage]` attribute for classes or methods to exclude them from coverage instead of `classfilters`.
 
-
-
 **resources**
 
 * [Microsoft - Use code coverage for unit testing](https://docs.microsoft.com/ja-jp/dotnet/core/testing/unit-testing-code-coverage?tabs=linux)
 * [GitHub - ReportGenerator](https://github.com/danielpalme/ReportGenerator)
 * [GitHub - dotnet-config](https://github.com/dotnetconfig/dotnet-config)
 
-## $$$ Parallelism
+## Jenkins integration
 
-## $$$ Jenkins integration
-
-* Use xUnit logger
-  * Jenkins supports xUnit v2 format
-  * [xunit.testlogger @GitHub](https://github.com/spekt/xunit.testlogger)
-  * If the above doesn't work, nUnit format is available, too
-    * [[.NET Core] VS Code を使った xUnit ユニットテストの導入](https://mseeeen.msen.jp/dotnet-core-xunit-test-project/)
-
+see https://github.com/tmonj1/learn-programming/issues/40
