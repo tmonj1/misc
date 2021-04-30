@@ -8,6 +8,10 @@ services:
     ports:
       - '8080:8080'
       - '5000:5000'
+    environment:
+      - LANG=ja_JP.UTF-8
+#      - JENKINS_OPTS=--prefix=/jenkins
+      - JAVA_OPTS=-Xms1024m -Xmx2048m -Duser.timezone=Asia/Tokyo -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
     volumes:
       - type: volume
         source: jenkins_home
