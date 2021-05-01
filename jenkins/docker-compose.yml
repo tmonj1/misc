@@ -11,7 +11,7 @@ services:
     environment:
       - LANG=ja_JP.UTF-8
       - LANGUAGE=ja_JP.UTF-8
-      - LC_ALL=ja_JP.UTF-8
+#      - LC_ALL=ja_JP.UTF-8
 #      - JENKINS_OPTS=--prefix=/jenkins
       - JAVA_OPTS=-Xms1024m -Xmx2048m -Duser.timezone=Asia/Tokyo -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
@@ -35,6 +35,7 @@ services:
       - LANG=ja_JP.UTF-8
       # for Windows
       - COMPOSE_CONVERT_WINDOWS_PATHS=1
+      - JENKINS_SLAVE_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqHZPcVU0v88xT0im+WPxZjV+wX+WAeT31U/nnNl2/tIwDf3h69Z/4f0Xp8CSIjPyDr0a58slL0oFlWWyNZ8AYB7cYoFiB13dJaWT66F/Bupl1OW4Xepd+rfcT8BnTFbpxaja5vj3VnO6HWsvd1ctG0lCT8AAkwqLlDne+IhTNj1igamZfBPAfNZUQo/MwPFxrVPo+EzMrc5+HFzVzZ/MkMuHUGBHFvzav9qppsyF7pEr3uTAtfTJ2OJf7MTvpAOtTyJQIwfdVsHxLwHhte2zhdBuOEpR+cn7k6dpNYFzHpeBzz1IcVzNQ8jgLJAdbEUwLDnyfVghxK4Prc1o4L2RB
     networks:
       - jenkins_network
 volumes:
