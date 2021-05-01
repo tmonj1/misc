@@ -5,8 +5,9 @@ EXPOSE 5000
 
 USER root
 
-# install sudo and allow "jenkins" to use it no-password.
-RUN apt-get update && \
+# set JDK path, then install sudo and allow "jenkins" to use it no-password.
+RUN ln -s /usr/local/openjdk-8/bin/java /usr/local/bin/java && \
+    apt-get update && \
     apt-get install sudo && \
     echo 'jenkins ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
