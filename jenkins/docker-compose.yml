@@ -26,6 +26,10 @@ services:
     build:
       context: ./jenkins_node_dockercli
       dockerfile: Dockerfile
+#      args:
+#        - aws_accesskey_id
+#        - aws_secretkey
+#        - aws_default_region=ap-northeast-1
     volumes:
       # bind host docker socket
       - type: bind
