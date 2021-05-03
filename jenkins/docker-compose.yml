@@ -16,9 +16,10 @@ services:
       - JAVA_OPTS=-Xms1024m -Xmx2048m -Duser.timezone=Asia/Tokyo -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
     volumes:
-      - type: volume
-        source: jenkins_home
-        target: /var/jenkins_home
+      - jenkins_home:/var/jenkins_home:delegated
+#      - type: volume
+#        source: jenkins_home
+#        target: /var/jenkins_home
     networks:
       - jenkins_network
   jenkins_node_dockercli:
@@ -35,6 +36,7 @@ services:
       - type: bind
         source: /var/run/docker.sock
         target: /var/run/docker.sock
+      - jenkins_home_agent:/home/jenkins:delegated
     environment:
       - LANG=ja_JP.UTF-8
       # for Windows
@@ -44,5 +46,6 @@ services:
       - jenkins_network
 volumes:
   jenkins_home:
+  jenkins_home_agent:
 networks:
   jenkins_network:
